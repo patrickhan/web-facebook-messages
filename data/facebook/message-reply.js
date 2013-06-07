@@ -30,12 +30,14 @@ var reply_message_editor_group =
     "url": null,
 };
 
+var message_editor_group = reply_message_editor_group;
+
 function find_Editor_group_replay_Message()
 {
     var a_id = WEB_CMM.uniqID(20);
     var role_name = WEB_CMM.PROJECT_NAME_PREFIX + WEB_CMM.INTEGRATING_ROLE_NAME + a_id;
     // find editor
-    if(!reply_message_editor_group.editor)
+    if(!message_editor_group.editor)
     {
         var editors$ = $(selector_editor_replay_Message);
         
@@ -46,14 +48,14 @@ function find_Editor_group_replay_Message()
         if(editors$.length == 1)//shoult there is only one
         {
             editors$.attr(role_name, WEB_CMM.ROLE_NAME_EDIT_BOX);
-            reply_message_editor_group.editor = editors$;
-        
-            reply_message_editor_group.id = a_id;
+            message_editor_group.editor = editors$;
+            editors$.get(0).wrappedJSObject.fnhookedFlag = true; 
+            message_editor_group.id = a_id;
         }
     }
   
     //find send button
-    if(!reply_message_editor_group.sendbox)
+    if(!message_editor_group.sendbox)
     {
         var send_boxes$ = $(selector_sendbox_replay_Message);
       
@@ -64,16 +66,19 @@ function find_Editor_group_replay_Message()
         if(send_boxes$.length == 1)//shoult there is only one
         {
           send_boxes$.attr(role_name, WEB_CMM.ROLE_NAME_SEND_BOX);
-          reply_message_editor_group.sendbox = send_boxes$;
+          message_editor_group.sendbox = send_boxes$;
+          
+          hook_Send_box();
         }
     }
   
     //recepient box
-    if(!reply_message_editor_group.tobox)
+    if(!message_editor_group.tobox)
     {
         var to_boxes$ = $('<div></div>').appendTo(document.body).hide();
         to_boxes$.attr(role_name, WEB_CMM.ROLE_NAME_TO_BOX);
-        reply_message_editor_group.tobox = to_boxes$;
+        to_boxes$.attr('id', a_id);
+        message_editor_group.tobox = to_boxes$;
         WEB_CMM.log("find to_boxe count is -- create new  and hide : " + " " +a_id );
         
         //test code
@@ -84,33 +89,188 @@ function find_Editor_group_replay_Message()
 function clean_Editor_group_replay_Message()
 {
   // editor
-    var role_name = WEB_CMM.PROJECT_NAME_PREFIX + WEB_CMM.INTEGRATING_ROLE_NAME + reply_message_editor_group.id;
-    if( reply_message_editor_group.editor)
+    var role_name = WEB_CMM.PROJECT_NAME_PREFIX + WEB_CMM.INTEGRATING_ROLE_NAME + message_editor_group.id;
+    if( message_editor_group.editor)
     {
-        WEB_CMM.log("clean_Editor_group " +  "editor_group.editor  " + reply_message_editor_group.editor);
-        reply_message_editor_group.editor.removeAttr(role_name);
+        delete message_editor_group.editor.get(0).wrappedJSObject.fnhookedFlag;
+        WEB_CMM.log("clean_Editor_group " +  "editor_group.editor  " + message_editor_group.editor);
+        message_editor_group.editor.removeAttr(role_name);
+        message_editor_group.editor.removeAttr("fn-toggle-option");
         WEB_CMM.log("clean_Editor_group editors removeAttr +  " + role_name);
-        reply_message_editor_group.editor = null;
+        message_editor_group.editor = null;
     }
 
-    if( reply_message_editor_group.sendbox)
+    if( message_editor_group.sendbox)
     {
-        reply_message_editor_group.sendbox.removeAttr(role_name);
+        unhook_Send_box();
+        message_editor_group.sendbox.removeAttr(role_name);
         WEB_CMM.log("sendbox removeAttr +  " + role_name);
-        reply_message_editor_group.sendbox =  null;
+        message_editor_group.sendbox =  null;
     }
 
-    if( reply_message_editor_group.tobox)
+    if( message_editor_group.tobox)
     {
-        reply_message_editor_group.tobox.remove();
+        message_editor_group.tobox.remove();
         WEB_CMM.log("getEditor", "tobox$ remove  " );
-        reply_message_editor_group.tobox =  null;
+        message_editor_group.tobox =  null;
+    }
+}
+
+
+
+function on_fnaction_over(evt)	
+{
+    try
+    {
+        if(evt.attrName == "fnremotehtmlreq-event-param"  )
+        {
+            if(evt.newValue=="true" || evt.newValue == "false")
+            {	
+                document.body.removeEventListener("DOMAttrModified",on_fnaction_over, false);
+                $(document.body).removeAttr("fnremotehtmlreq-event-param");
+                message_editor_group.tobox.removeAttr("fnremotehtmlreq-event-param");   
+                message_editor_group.editor.removeAttr("fnremotehtmlreq-event-param");   
+               if (evt.newValue=="true") {
+                    //should add invitation
+                    var untrustedEmails =  $(document.body).attr("fnremotehtmlreq-event-param-subvalue");
+                    $(document.body).removeAttr("fnremotehtmlreq-event-param-subvalue");
+                    if (untrustedEmails.length > 0) {
+                        WEB_CMM.onprepare_send_invitation(untrustedEmails);
+                    }
+                }
+                //click the button again
+                call_simulate_mouse_click_jquery(  message_editor_group.sendbox, 300)
+            }
+        }
+    }
+    catch(err)
+    {
+        //alert(err)
+    }
+}
+
+function call_simulate_mouse_click_jquery( box_obj$, timeout)
+{
+    if(!box_obj$)
+        return;
+    setTimeout(function(){
+                box_obj$.trigger('click');
+            }	, timeout);
+}
+
+
+function on_editorbox_keypress(evt)
+{
+    if(evt.keyCode == 13)
+    {
+        //it is not easy to detect the send box is visible
+        //so detect the sendbox.parent.parent.css.left == 0 to check the 'press enter to send message'
+        //var send_moved =
+        var parent_css_left = message_editor_group.sendbox.parent().parent().css("left");
+        var parent_css_left_int = parseInt(parent_css_left);
+        if (0 != parent_css_left_int) {
+            evt.preventDefault();
+            evt.stopPropagation();  
+            sending_msg_routing();
+            
+            if(!message_editor_group.sendbox.get(0).hj_cocntrol || message_editor_group.sendbox.get(0).hj_cocntrol == 0)
+            {
+                message_editor_group.sendbox.get(0).hj_cocntrol = 1;
+            }
+        }
+    }
+}
+
+function fill_a_recepient_reply_message(editor, tobox)
+{
+    var transobj = {funname:"addReceiptsToAnInput_Forfacebook_replyMsg", param:tobox.id};    	        
+    $(editor).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));              
+    //$(editor).trigger("fnRemoteHtmlReq-event") // is it work
+    var event = document.createEvent("HTMLEvents");        
+    event.initEvent("fnRemoteHtmlReq-event", true, false);            
+    editor.dispatchEvent(event)   
+    
+}
+
+function sending_msg_routing() {
+    try{
+        WEB_CMM.tell_to_box(message_editor_group.tobox.get(0));
+        
+        WEB_CMM.tell_editor( message_editor_group.editor.get(0) );
+        
+        fill_a_recepient_reply_message(message_editor_group.editor.get(0), message_editor_group.tobox.get(0));
+        
+        //WEB_CMM.fill_recepients( message_editor_group.editor.get(0), message_editor_group.tobox.get(0) );
+        
+        WEB_CMM.trigger_preSending();
+        
+        WEB_CMM.onAfter_preSending_event(on_fnaction_over);
+    }
+    catch( err )
+    {
+        //alert(err);
+    } 
+}
+
+function on_replybox_click(evt)
+{
+    if(!evt.target.hj_cocntrol || evt.target.hj_cocntrol == 0)
+    {
+        evt.target.hj_cocntrol = 1;
+    }
+    else
+    {
+        evt.target.hj_cocntrol = 0;
+        return;
+    }
+    evt.stopPropagation();
+    evt.preventDefault();
+                                    
+    sending_msg_routing();
+}
+
+function hook_Send_box()
+{
+    if( message_editor_group.sendbox)
+    {
+        var send_obj = message_editor_group.sendbox;
+        if(send_obj)
+        {
+            send_obj.get(0).parentNode.addEventListener('click' , on_replybox_click,true);
+            
+        }
+    }
+    
+    if(message_editor_group.editor)
+    {
+        var editor  = message_editor_group.editor.get(0);
+        if (editor) {
+            editor.parentNode.addEventListener('keydown' , on_editorbox_keypress,true);
+            //editor.parentNode.addEventListener('keypress' , on_editorbox_keypress,true);
+            //editor.parentNode.addEventListener('keyup' , on_editorbox_keypress,true);
+        }
+    }
+}
+
+function unhook_Send_box()
+{
+    if( message_editor_group.sendbox)
+    {
+        var send_obj = message_editor_group.sendbox;
+        if(send_obj)
+        {
+            send_obj.get(0).parentNode.removeEventListener('click' , on_replybox_click,true);
+        }
     }
 }
 
 function is_my_page(url_spec)
 {
     var reg_URL = /^https:\/\/www.facebook.com\/messages\/(?!new)./ ;
+    //match 'https://www.facebook.com/messages/xxxx
+    //mismatch 'https://www.facebook.com/messages/new
+    //mismatch 'https://www.facebook.com/messages/
+    
     var match = reg_URL.test( url_spec );
     return match;
 }
@@ -123,12 +283,12 @@ self.port.on("getEditors", function(url_spec) {
         if(document.URL == url_spec)
         {
             WEB_CMM.log("** match the url ***" + url_spec );
-            if(reply_message_editor_group.url != document.URL )
+            if(message_editor_group.url != document.URL )
             {
                     clean_Editor_group_replay_Message();
             }
             find_Editor_group_replay_Message();
-            reply_message_editor_group.url = document.URL;
+            message_editor_group.url = document.URL;
         }
     }
     else

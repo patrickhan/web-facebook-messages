@@ -266,6 +266,46 @@ function AppenddInvitation_ForWebPage (doc, param, editObj) // new logic , shoul
     let anOETController = g_OETManager.append_invitation(doc.fntoggledPlg, param);
 }
 
+function addReceiptsToAnInput_Forfacebook_replyMsg(doc, param, editObj)
+{
+    var to_box  = doc.getElementById(param);
+    Components.utils.import("resource://browsercontent/FnGlobalObject.jsm");
+    var pageMsg = doc.getElementById("pagelet_web_messenger");
+    if(pageMsg == null) {
+	return;
+    }
+    var objName = "webMessageEmails";
+    var emailObj = FnGlobalObject.getObject(objName, node);
+    if(emailObj) {
+	if(emailObj.length > 0) {
+	    //concat original emails
+	    emailObj = emailObj[0];
+	    g_OETManager.log(emailObj);
+	    if (to_box) {
+		to_box.innerHTML = emailObj;
+	    }
+	    
+	    var inputEle = editObj;
+	    if(inputEle.currentReaders !== undefined)
+	    {
+		let aEmail = emailObj;		
+		    ContactModule.getOwnerIdByEmail(aEmail, function(result){		    
+			if(result == null || result.length == 0)
+			{
+			    inputEle.currentReaders[aEmail] = 0;
+			}
+			else
+			{
+			    inputEle.currentReaders[aEmail] = result[0];
+			}			
+		    });
+	    }
+	}
+    }
+    
+    
+}
+
 EcselfDefineGlobalScope.FnTextBoxBlurEvtProcess = function(doc, fnboxEle)
 {
     var FnComHelper = Components.classes["@FNTechnologies.com/Mozilla/FNWebSvrJSHelper;1"].

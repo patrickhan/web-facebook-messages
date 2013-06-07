@@ -26,12 +26,14 @@ var new_message_editor_group =
     "tobox": null, 
 };
 
+var message_editor_group = new_message_editor_group;
+
 function find_Editor_group()
 {
   var a_id = WEB_CMM.uniqID(20);
   var role_name = WEB_CMM.PROJECT_NAME_PREFIX + WEB_CMM.INTEGRATING_ROLE_NAME + a_id;
   // find editor
-  if(!new_message_editor_group.editor)
+  if(!message_editor_group.editor)
   {
     var editors$ = $(selector_editor);
 
@@ -42,14 +44,14 @@ function find_Editor_group()
     if(editors$.length == 1)//shoult there is only one
     {
       editors$.attr(role_name, WEB_CMM.ROLE_NAME_EDIT_BOX);
-      new_message_editor_group.editor = editors$;
+      message_editor_group.editor = editors$;
       editors$.get(0).wrappedJSObject.fnhookedFlag = true; 
-      new_message_editor_group.id = a_id;
+      message_editor_group.id = a_id;
     }
   }
   
   //find send button
-  if(!new_message_editor_group.sendbox)
+  if(!message_editor_group.sendbox)
   {
     var send_boxes$ = $(selector_sendbox);
 
@@ -60,13 +62,13 @@ function find_Editor_group()
     if(send_boxes$.length == 1)//shoult there is only one
     {
           send_boxes$.attr(role_name, WEB_CMM.ROLE_NAME_SEND_BOX);
-          new_message_editor_group.sendbox = send_boxes$;
+          message_editor_group.sendbox = send_boxes$;
           hook_Send_box();
     }
   }
   
   //recepient box
-    if(!new_message_editor_group.tobox)
+    if(!message_editor_group.tobox)
     {
         var to_boxes$ =  $.xpath(selector_tobox).next("td");
         
@@ -77,7 +79,7 @@ function find_Editor_group()
         if(to_boxes$.length == 1)//shoult there is only one
         {
           to_boxes$.attr(role_name, WEB_CMM.ROLE_NAME_TO_BOX);
-          new_message_editor_group.tobox = to_boxes$;
+          message_editor_group.tobox = to_boxes$;
           //test code
           M_TEST.insert_data_ToBox(to_boxes$.get(0) );
         }
@@ -88,32 +90,30 @@ function find_Editor_group()
 
 function clean_Editor_group()
 {
-    var role_name = WEB_CMM.PROJECT_NAME_PREFIX + WEB_CMM.INTEGRATING_ROLE_NAME + new_message_editor_group.id;
-    if( new_message_editor_group.editor)
+    var role_name = WEB_CMM.PROJECT_NAME_PREFIX + WEB_CMM.INTEGRATING_ROLE_NAME + message_editor_group.id;
+    if( message_editor_group.editor)
     {
-        delete editors$.get(0).wrappedJSObject.fnhookedFlag;
-        
-        WEB_CMM.log("clean " +  "editor_group.editor  " + new_message_editor_group.editor);
-        
-        new_message_editor_group.editor.removeAttr(role_name);
-
+        delete message_editor_group.editor.get(0).wrappedJSObject.fnhookedFlag;
+        WEB_CMM.log("clean " +  "editor_group.editor  " + message_editor_group.editor);
+        message_editor_group.editor.removeAttr(role_name);
+        message_editor_group.editor.removeAttr("fn-toggle-option");
         WEB_CMM.log("clean " + "editors removeAttr " + role_name);
-        new_message_editor_group.editor = null;
+        message_editor_group.editor = null;
     }
 
-    if( new_message_editor_group.sendbox)
+    if( message_editor_group.sendbox)
     {
         unhook_Send_box();
-        new_message_editor_group.sendbox.removeAttr(role_name);
+        message_editor_group.sendbox.removeAttr(role_name);
         WEB_CMM.log("clean " +  "sendbox removeAttr " + role_name);
-        new_message_editor_group.sendbox =  null;
+        message_editor_group.sendbox =  null;
     }
 
-    if( new_message_editor_group.tobox)
+    if( message_editor_group.tobox)
     {
-        new_message_editor_group.tobox.removeAttr(role_name);
+        message_editor_group.tobox.removeAttr(role_name);
         WEB_CMM.log("clean " + "tobox removeAttr +  " + role_name);
-        new_message_editor_group.tobox =  null;
+        message_editor_group.tobox =  null;
     }
     
     clean_Editor_group_test();
@@ -137,19 +137,19 @@ function on_fnaction_over(evt)
             if(evt.newValue=="true" || evt.newValue == "false")
             {	
                 document.body.removeEventListener("DOMAttrModified",on_fnaction_over, false);
-                $(document.body).removeAttr("fnRemoteHtmlReq-event-param");
-                new_message_editor_group.tobox.removeAttr("fnRemoteHtmlReq-event-param");   
-                new_message_editor_group.editor.removeAttr("fnRemoteHtmlReq-event-param");   
+                $(document.body).removeAttr("fnremotehtmlreq-event-param");
+                message_editor_group.tobox.removeAttr("fnremotehtmlreq-event-param");   
+                message_editor_group.editor.removeAttr("fnremotehtmlreq-event-param");   
                if (evt.newValue=="true") {
                     //should add invitation
-                    var untrustedEmails =  $(document.body).attr("fnRemoteHtmlReq-event-param-subvalue");
-                    $(document.body).removeAttr("fnRemoteHtmlReq-event-param-subvalue");
+                    var untrustedEmails =  $(document.body).attr("fnremotehtmlreq-event-param-subvalue");
+                    $(document.body).removeAttr("fnremotehtmlreq-event-param-subvalue");
                     if (untrustedEmails.length > 0) {
-                        onprepare_send_invitation(untrustedEmails);
+                        WEB_CMM.onprepare_send_invitation(untrustedEmails);
                     }
                 }
                 //click the button again
-                call_simulate_mouse_click_jquery(  new_message_editor_group.sendbox, 300)
+                call_simulate_mouse_click_jquery(  message_editor_group.sendbox, 300)
             }
         }
     }
@@ -159,7 +159,7 @@ function on_fnaction_over(evt)
     }
 }
 
-function on_mousedown(evt)
+function on_sendbox_click(evt)
 {
     if(!evt.target.hj_cocntrol || evt.target.hj_cocntrol == 0)
     {
@@ -174,11 +174,11 @@ function on_mousedown(evt)
     evt.preventDefault();
                                     
     try{
-        WEB_CMM.tell_to_box(new_message_editor_group.tobox.get(0))
+        WEB_CMM.tell_to_box(message_editor_group.tobox.get(0))
         
-        WEB_CMM.tell_editor( new_message_editor_group.editor.get(0) )
+        WEB_CMM.tell_editor( message_editor_group.editor.get(0) )
         
-        WEB_CMM.fill_recepients( new_message_editor_group.editor.get(0), new_message_editor_group.tobox.get(0) )
+        WEB_CMM.fill_recepients( message_editor_group.editor.get(0), message_editor_group.tobox.get(0) )
         
         WEB_CMM.trigger_preSending()
         
@@ -192,24 +192,24 @@ function on_mousedown(evt)
 
 function hook_Send_box()
 {
-    if( new_message_editor_group.sendbox)
+    if( message_editor_group.sendbox)
     {
-        var send_obj = new_message_editor_group.sendbox;
+        var send_obj = message_editor_group.sendbox;
         if(send_obj)
         {
-            send_obj.get(0).parentNode.addEventListener('click' , on_mousedown,true);
+            send_obj.get(0).parentNode.addEventListener('click' , on_sendbox_click,true);
         }
     }
 }
 
 function unhook_Send_box()
 {
-    if( new_message_editor_group.sendbox)
+    if( message_editor_group.sendbox)
     {
-        var send_obj = new_message_editor_group.sendbox;
+        var send_obj = message_editor_group.sendbox;
         if(send_obj)
         {
-            send_obj.get(0).parentNode.removeEventListener('click' , on_mousedown,true);
+            send_obj.get(0).parentNode.removeEventListener('click' , on_sendbox_click,true);
         }
     }
 }
@@ -233,9 +233,9 @@ function is_my_page(url_spec)
 
 /*
  self.port.on("send-message", function(data) {
-    if( is_my_page(data) && new_message_editor_group.sendbox)
+    if( is_my_page(data) && message_editor_group.sendbox)
     {
-        var send_obj = new_message_editor_group.sendbox;
+        var send_obj = message_editor_group.sendbox;
         if(send_obj)
         {
             call_simulate_mouse_click_jquery(send_obj.parent(), 1 );

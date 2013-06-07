@@ -79,9 +79,9 @@ let CONTENTATTACHMENT = {};
     function showContentAttachment(inputobj)
     {
         //inputobj.setAttribute("fn-toggle-option", "FNRTE");
-		if (g_OETManager.is_fn_integrating_Editor(inputobj)  ||  (inputobj.wrappedJSObject.fnhookedFlag !== undefined) ) {
-            inputobj.setAttribute("fntoggledURL", "toggle_withWebPageHavingReceipts.html");
-            inputobj.setAttribute("fntoggledStyles",JSON.stringify({frameWidth:"448px", frameHeight:"395px"}));
+	if (g_OETManager.is_fn_integrating_Editor(inputobj)  ||  (inputobj.wrappedJSObject.fnhookedFlag !== undefined) ) {
+	    inputobj.setAttribute("fntoggledURL", "toggle_withWebPageHavingReceipts.html");
+	    inputobj.setAttribute("fntoggledStyles",JSON.stringify({frameWidth:"448px", frameHeight:"395px"}));
         } else {
             inputobj.setAttribute("fntoggledURL", "toggle_withWebPageNoReceipts.html");
             inputobj.setAttribute("fntoggledStyles",JSON.stringify({frameWidth:"448px", frameHeight:"433px"}));
@@ -91,8 +91,8 @@ let CONTENTATTACHMENT = {};
 		
 		if(inputobj.ownerDocument.m_FN_receiptsObj === undefined)
 		{
-		     toggleBussinessobj.toggledPlg = inputobj;
-             toggleBussinessobj.toggle(inputobj);
+		    toggleBussinessobj.toggledPlg = inputobj;
+		    toggleBussinessobj.toggle(inputobj);
 			return;
 		}
         // set the value or innerHTML back so they can be handled by

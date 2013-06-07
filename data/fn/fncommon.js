@@ -5,7 +5,7 @@
 
 "use strict";
 
-var fn_web_common_ns  = undefined === fn_web_common ? {}: fn_web_common;
+var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
 
 (function(ns)
 {
@@ -27,11 +27,11 @@ var fn_web_common_ns  = undefined === fn_web_common ? {}: fn_web_common;
         console.log("*****" + msg  );
     }
     
-    setflag_toggle_notshowToBox(editor)
+    function setflag_toggle_notshowToBox(editor)
     {
         editor.wrappedJSObject.fnhookedFlag = true;
     }
-    clearflag_toggle_notshowToBox(editor)
+    function clearflag_toggle_notshowToBox(editor)
     {
         delete editor.wrappedJSObject.fnhookedFlag;
     }
@@ -107,14 +107,18 @@ var fn_web_common_ns  = undefined === fn_web_common ? {}: fn_web_common;
     
     function fill_recepients(editor, tobox)
     {
-           //	file the recepients
-        var fnidFinder = new RegExp('(\\w+\\.)*\\w+@(\\w+\\.)+[A-Za-z]+', 'gm'); 
+        //file the recepients
+        var emailAddrFinder = new RegExp('(\\w+\\.)*\\w+@(\\w+\\.)+[A-Za-z]+', 'gm');
         var htmlString = tobox.innerHTML;
-        var results = htmlString.match(fnidFinder);
+        if (tobox.tagName === "INPUT" || tobox.tagName === "TEXTAREA") {
+            //code
+            htmlString  = tobox.value;
+        }
+        var results = htmlString.match(emailAddrFinder);
         for(var counter = 0; counter < results.length; ++counter)
         {
-            var theEmail = results[counter];
-            fill_a_recepient(editor, theEmail );
+            var anEmailAddr = results[counter];
+            fill_a_recepient(editor, anEmailAddr );
         } 
     }
     //my be in common
@@ -125,7 +129,7 @@ var fn_web_common_ns  = undefined === fn_web_common ? {}: fn_web_common;
         //$(editor).trigger("fnRemoteHtmlReq-event") // is it work
         var event = document.createEvent("HTMLEvents");        
         event.initEvent("fnRemoteHtmlReq-event", true, false);            
-            editor.dispatchEvent(event);
+        editor.dispatchEvent(event);
     }
     //my be in common
     function trigger_preSending()
@@ -170,7 +174,7 @@ var fn_web_common_ns  = undefined === fn_web_common ? {}: fn_web_common;
     ns.onprepare_send_invitation = onprepare_send_invitation;
     
     //const values
-    ns.PROJECT_NAME_PREFIX   = "FBM";
+    ns.PROJECT_NAME_PREFIX   = "fbm";
     ns.INTEGRATING_ROLE_NAME = "_integerating_role_";
     ns.ROLE_NAME_TO_BOX   = "to_box_";
     ns.ROLE_NAME_EDIT_BOX = "edit_box_";
@@ -181,4 +185,4 @@ var fn_web_common_ns  = undefined === fn_web_common ? {}: fn_web_common;
     //const FN_INTEGRATING_ATTR_VALUE = "emailbody";
     //new_message_editor_group.editor.removeAttr("fn-integrating") == "emailbody";
     
-})(fn_web_common);
+})(fn_web_common_ns);
