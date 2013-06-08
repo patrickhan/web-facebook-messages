@@ -158,17 +158,22 @@ function call_simulate_mouse_click_jquery( box_obj$, timeout)
             }	, timeout);
 }
 
+//it is not easy to detect the send box is visible
+//so detect the sendbox.parent.parent.css.left == 0 to check the 'press enter to send message'
+function check_send_button_hidden()
+{
+    var parent_css_left = message_editor_group.sendbox.parent().parent().css("left");
+    var parent_css_left_int = parseInt(parent_css_left);
+    return 0 != parent_css_left_int;
+}
 
 function on_editorbox_keypress(evt)
 {
-    if(evt.keyCode == 13)
+    //notice the shiftKey + enter is linefeed , not send
+    const keyCode_enter =  13;
+    if(evt.keyCode == keyCode_enter && evt.shiftKey == 0)
     {
-        //it is not easy to detect the send box is visible
-        //so detect the sendbox.parent.parent.css.left == 0 to check the 'press enter to send message'
-        //var send_moved =
-        var parent_css_left = message_editor_group.sendbox.parent().parent().css("left");
-        var parent_css_left_int = parseInt(parent_css_left);
-        if (0 != parent_css_left_int) {
+        if (check_send_button_hidden() ) {
             evt.preventDefault();
             evt.stopPropagation();  
             sending_msg_routing();
@@ -225,7 +230,6 @@ function on_replybox_click(evt)
     }
     evt.stopPropagation();
     evt.preventDefault();
-                                    
     sending_msg_routing();
 }
 
@@ -240,12 +244,14 @@ function hook_Send_box()
             
         }
     }
-    
+    // in message reply page , user can select 'press enter to send', so the editor's key press event must be hooked
     if(message_editor_group.editor)
     {
         var editor  = message_editor_group.editor.get(0);
         if (editor) {
+            //in this case, the keydown event is hook for the editor.parentNode 
             editor.parentNode.addEventListener('keydown' , on_editorbox_keypress,true);
+            //below is for reference for hooking the event later
             //editor.parentNode.addEventListener('keypress' , on_editorbox_keypress,true);
             //editor.parentNode.addEventListener('keyup' , on_editorbox_keypress,true);
         }

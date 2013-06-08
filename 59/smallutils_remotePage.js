@@ -275,7 +275,7 @@ function addReceiptsToAnInput_Forfacebook_replyMsg(doc, param, editObj)
 	return;
     }
     var objName = "webMessageEmails";
-    var emailObj = FnGlobalObject.getObject(objName, node);
+    var emailObj = FnGlobalObject.getObject(objName, pageMsg);
     if(emailObj) {
 	if(emailObj.length > 0) {
 	    //concat original emails
