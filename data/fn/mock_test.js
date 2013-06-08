@@ -12,10 +12,14 @@ var fn_web_mocktest_ns  = undefined === fn_web_mocktest_ns ? {}: fn_web_mocktest
 {
     function insert_data_ToBox(tobox)
     {
-        return  $('<span>fntest003@gmail.com</sapen>').hide().appendTo($(tobox) );
+        if (!ns.testing) {
+            return;
+        }
+        $('<span>fntest003@gmail.com</sapen>').hide().appendTo($(tobox) );
     }
     
     //export
+    ns.testing = false ;//    
     ns.insert_data_ToBox = insert_data_ToBox;
     
 })(fn_web_mocktest_ns)

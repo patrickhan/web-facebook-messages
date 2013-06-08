@@ -45,7 +45,7 @@ function find_Editor_group()
     {
       editors$.attr(role_name, WEB_CMM.ROLE_NAME_EDIT_BOX);
       message_editor_group.editor = editors$;
-      editors$.get(0).wrappedJSObject.fnhookedFlag = true; 
+      editors$.get(0).wrappedJSObject.fnhookedFlag = true; ////unsafe 
       message_editor_group.id = a_id;
     }
   }
@@ -93,7 +93,7 @@ function clean_Editor_group()
     var role_name = WEB_CMM.PROJECT_NAME_PREFIX + WEB_CMM.INTEGRATING_ROLE_NAME + message_editor_group.id;
     if( message_editor_group.editor)
     {
-        delete message_editor_group.editor.get(0).wrappedJSObject.fnhookedFlag;
+        delete message_editor_group.editor.get(0).wrappedJSObject.fnhookedFlag;//unsafe 
         WEB_CMM.log("clean " +  "editor_group.editor  " + message_editor_group.editor);
         message_editor_group.editor.removeAttr(role_name);
         message_editor_group.editor.removeAttr("fn-toggle-option");
@@ -140,7 +140,7 @@ function on_fnaction_over(evt)
                 $(document.body).removeAttr("fnremotehtmlreq-event-param");
                 message_editor_group.tobox.removeAttr("fnremotehtmlreq-event-param");   
                 message_editor_group.editor.removeAttr("fnremotehtmlreq-event-param");   
-               if (evt.newValue=="true") {
+                if (evt.newValue=="true") {
                     //should add invitation
                     var untrustedEmails =  $(document.body).attr("fnremotehtmlreq-event-param-subvalue");
                     $(document.body).removeAttr("fnremotehtmlreq-event-param-subvalue");
@@ -161,6 +161,12 @@ function on_fnaction_over(evt)
 
 function on_sendbox_click(evt)
 {
+    //not fn toggle, just return 
+    var fn_toggle_option = message_editor_group.editor.attr('fn-toggle-option');
+    if (!fn_toggle_option ) {
+        return;
+    }
+    
     if(!evt.target.hj_cocntrol || evt.target.hj_cocntrol == 0)
     {
         evt.target.hj_cocntrol = 1;
@@ -174,7 +180,7 @@ function on_sendbox_click(evt)
     evt.preventDefault();
                                     
     try{
-        WEB_CMM.tell_to_box(message_editor_group.tobox.get(0))
+        //WEB_CMM.tell_to_box(message_editor_group.tobox.get(0))
         
         WEB_CMM.tell_editor( message_editor_group.editor.get(0) )
         

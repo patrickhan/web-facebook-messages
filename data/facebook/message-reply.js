@@ -169,6 +169,11 @@ function check_send_button_hidden()
 
 function on_editorbox_keypress(evt)
 {
+    //not fn toggle, just return 
+    var fn_toggle_option = message_editor_group.editor.attr('fn-toggle-option');
+    if (!fn_toggle_option ) {
+        return;
+    }
     //notice the shiftKey + enter is linefeed , not send
     const keyCode_enter =  13;
     if(evt.keyCode == keyCode_enter && evt.shiftKey == 0)
@@ -219,6 +224,11 @@ function sending_msg_routing() {
 
 function on_replybox_click(evt)
 {
+    //not fn toggle, just return 
+    var fn_toggle_option = message_editor_group.editor.attr('fn-toggle-option');
+    if (!fn_toggle_option ) {
+        return;
+    }
     if(!evt.target.hj_cocntrol || evt.target.hj_cocntrol == 0)
     {
         evt.target.hj_cocntrol = 1;

@@ -233,7 +233,6 @@ function RTEobjShowPlainTextMsgMixFormat_ForWebpage_V2(doc, param, rteobj)
 
 function addReceiptsToAnInput_ForWebPage(doc, param, inputEle)
 {
-    //inputEle.currentReaders !== undefined
     if(inputEle.currentReaders !== undefined)
     {
 	    let aEmail = param;		
@@ -268,19 +267,22 @@ function AppenddInvitation_ForWebPage (doc, param, editObj) // new logic , shoul
 
 function addReceiptsToAnInput_Forfacebook_replyMsg(doc, param, editObj)
 {
+    
     var to_box  = doc.getElementById(param);
     Components.utils.import("resource://browsercontent/FnGlobalObject.jsm");
     var pageMsg = doc.getElementById("pagelet_web_messenger");
     if(pageMsg == null) {
 	return;
     }
+    
     var objName = "webMessageEmails";
     var emailObj = FnGlobalObject.getObject(objName, pageMsg);
+    
     if(emailObj) {
+	
 	if(emailObj.length > 0) {
 	    //concat original emails
 	    emailObj = emailObj[0];
-	    g_OETManager.log(emailObj);
 	    if (to_box) {
 		to_box.innerHTML = emailObj;
 	    }

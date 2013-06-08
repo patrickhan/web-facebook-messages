@@ -24,7 +24,10 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     
     function log( msg)
     {
-        console.log("*****" + msg  );
+        if( !ns.nolog)
+        {
+            console.log("*****" + msg  );
+        }
     }
     
     function setflag_toggle_notshowToBox(editor)
@@ -83,7 +86,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
         }, timeout);
     }
     
-    //my be in common
+    
     function tell_to_box( tobox)
     {
         var transobj = {funname:"setReceiptobjForInivitation_forRemoteWebpage", param:null};    	        
@@ -121,7 +124,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
             fill_a_recepient(editor, anEmailAddr );
         } 
     }
-    //my be in common
+    
     function tell_editor(editor)
     {
         var transobj = {funname:"setEditorobjForInivitation_forRemoteWebpage", param:null};    	        
@@ -131,7 +134,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
         event.initEvent("fnRemoteHtmlReq-event", true, false);            
         editor.dispatchEvent(event);
     }
-    //my be in common
+    
     function trigger_preSending()
     {
         var transobj = {funname:"SendInvitation_ForWebPage", param:null};    	        
@@ -141,7 +144,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
         event.initEvent("fnRemoteHtmlReq-event", true, false);            
         document.body.dispatchEvent(event);
     }
-    //my be in common
+    
     function onAfter_preSending_event(callback)
     {
         document.body.addEventListener("DOMAttrModified", callback, false);   
@@ -159,6 +162,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
 
     //export
     //functions
+    ns.nolog = true;;
     ns.uniqID = uniqID;
     ns.log = log;
     ns.setflag_toggle_notshowToBox =  setflag_toggle_notshowToBox;
