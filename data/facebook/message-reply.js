@@ -95,7 +95,7 @@ function clean_Editor_group_replay_Message()
         delete message_editor_group.editor.get(0).wrappedJSObject.fnhookedFlag;
         WEB_CMM.log("clean_Editor_group " +  "editor_group.editor  " + message_editor_group.editor);
         message_editor_group.editor.removeAttr(role_name);
-        message_editor_group.editor.removeAttr("fn-toggle-option");
+        //message_editor_group.editor.removeAttr("fn-toggle-option");
         WEB_CMM.log("clean_Editor_group editors removeAttr +  " + role_name);
         message_editor_group.editor = null;
     }
@@ -257,6 +257,9 @@ function hook_Send_box()
     // in message reply page , user can select 'press enter to send', so the editor's key press event must be hooked
     if(message_editor_group.editor)
     {
+        
+        
+        
         var editor  = message_editor_group.editor.get(0);
         if (editor) {
             //in this case, the keydown event is hooked for the editor.parentNode 
@@ -264,8 +267,15 @@ function hook_Send_box()
             //below is for reference for hooking the event later
             //editor.parentNode.addEventListener('keypress' , on_editorbox_keypress,true);
             //editor.parentNode.addEventListener('keyup' , on_editorbox_keypress,true);
+            editor.addEventListener("fn_togglebackfinished", function(evt){
+                                call_simulate_mouse_click_jquery(  message_editor_group.sendbox, 100)
+                            }, false);
+            
+            
         }
     }
+    
+    
 }
 
 function unhook_Send_box()

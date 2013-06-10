@@ -96,7 +96,7 @@ function clean_Editor_group()
         delete message_editor_group.editor.get(0).wrappedJSObject.fnhookedFlag;//unsafe 
         WEB_CMM.log("clean " +  "editor_group.editor  " + message_editor_group.editor);
         message_editor_group.editor.removeAttr(role_name);
-        message_editor_group.editor.removeAttr("fn-toggle-option");
+        //message_editor_group.editor.removeAttr("fn-toggle-option");
         WEB_CMM.log("clean " + "editors removeAttr " + role_name);
         message_editor_group.editor = null;
     }
@@ -212,6 +212,15 @@ function hook_Send_box()
         if(send_obj)
         {
             send_obj.get(0).parentNode.addEventListener('click' , on_sendbox_click,true);
+        }
+    }
+    if(message_editor_group.editor)
+    {
+        var editor  = message_editor_group.editor.get(0);
+        if (editor) {
+            editor.addEventListener("fn_togglebackfinished", function(evt){
+                                call_simulate_mouse_click_jquery(  message_editor_group.sendbox, 100)
+                            }, false);
         }
     }
 }

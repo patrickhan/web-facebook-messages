@@ -7,18 +7,21 @@ let CONTENTATTACHMENT = {};
     //Add Event listener to FnInputEleFocus
     document.addEventListener("FnInputEleFocus", function(evt){
         //setTimeout(function(evt){
-		let inputobj = evt.target;
+		let inputobj = evt.target;		
 		if(showContentAttachmentOrNot(inputobj) == true)
 		{
 		    if(inputobj.lastpopContentAttachmentTime === undefined)
 			{
 			    showContentAttachment(inputobj);
 				inputobj.lastpopContentAttachmentTime = (new Date()).getTime();
+				inputobj.addEventListener("fn_togglebackfinished", function(evt){
+				    inputobj.lastpopContentAttachmentTime = (new Date()).getTime();
+				}, false)
 			}
 			else
 			{
 			    let curTime = (new Date()).getTime();
-				if(curTime - inputobj.lastpopContentAttachmentTime < 300)
+				if(curTime - inputobj.lastpopContentAttachmentTime < 1300)
 				{
 					return;
 				}
