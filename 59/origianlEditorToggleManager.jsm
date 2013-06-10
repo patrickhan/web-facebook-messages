@@ -124,12 +124,9 @@ let OETController_ExtendedProp = {
 	{
 		let eventHolder = this.originalEditor;
 		let is_fn_integrating =  false;
-		if(g_OETManager.is_fn_integrating_page( eventHolder.ownerDocument ) )
+		if(g_OETManager.is_fn_integrating_Editor( eventHolder ) )
 		{
-			if(g_OETManager.is_fn_integrating_Editor( eventHolder ) )
-			{
-				is_fn_integrating =  true;
-			}
+			is_fn_integrating =  true;
 		}
 		if(is_fn_integrating)
 		{
@@ -150,13 +147,11 @@ let OETController_ExtendedProp = {
 	{
 		let eventHolder = this.originalEditor;
 		let is_fn_integrating =  false;
-		if(g_OETManager.is_fn_integrating_page( eventHolder.ownerDocument ) )
+		if(g_OETManager.is_fn_integrating_Editor( eventHolder ) )
 		{
-			if(g_OETManager.is_fn_integrating_Editor( eventHolder ) )
-			{
-				is_fn_integrating =  true;
-			}
+			is_fn_integrating =  true;
 		}
+		
 		if(is_fn_integrating)
 		{
 			if(this.originalEditor.tagName == "IFRAME" ) 
@@ -175,12 +170,9 @@ let OETController_ExtendedProp = {
 	fnpresent: function()
 	{
 		let is_fn_integrating =  false;
-		//if(g_OETManager.is_fn_integrating_page( this.originalEditor.ownerDocument ) ) // so far we only identify the 'is_fn_integrating' by editor
+		if(g_OETManager.is_fn_integrating_Editor( this.originalEditor ) )
 		{
-			if(g_OETManager.is_fn_integrating_Editor( this.originalEditor ) )
-			{
-				is_fn_integrating =  true;
-			}
+			is_fn_integrating =  true;
 		}
 		if(!is_fn_integrating)
 		{
@@ -198,7 +190,7 @@ let OETController_ExtendedProp = {
 			{
 				if(timespan < 1000)
 				{
-				return;
+					return;
 				}
 			}
 		}
@@ -219,13 +211,11 @@ let OETController_ExtendedProp = {
 	originalPresent : function()
 	{
 			let is_fn_integrating =  false;
-			if(g_OETManager.is_fn_integrating_page( this.originalEditor.ownerDocument ) )
+			if(g_OETManager.is_fn_integrating_Editor( this.originalEditor ) )
 			{
-				if(g_OETManager.is_fn_integrating_Editor( this.originalEditor ) )
-				{
-					is_fn_integrating =  true;
-				}
+				is_fn_integrating =  true;
 			}
+			
 			if(!is_fn_integrating)
 			{
 				if(this.originalEditor.currentReaders === undefined)
@@ -241,7 +231,7 @@ let OETController_ExtendedProp = {
 				{
 					if(timespan < 1000)
 					{
-					return;
+						return;
 					}
 				}
 			}
@@ -261,12 +251,9 @@ let OETController_ExtendedProp = {
 			}
 			
 			this.removeTogleListener();
-
 			this.initialized =  false;
-			
 			this.emit("OETControllerRemove", null);
-    	
-    	//alert_log__("remove_handler for a OETController")
+
 		}
 
 	},
@@ -327,8 +314,8 @@ let OETController_ExtendedProp = {
 		if(!content || content.length == 0)
 			return false;
 	    
-	    var aPlainTextFNCipherCombiner = Cc["@fntechnologies.com/firefoxhelper/plaintextfnciphercombiner;1"].
-                 createInstance(Ci.IPlainTextFNCipherCombiner);
+		var aPlainTextFNCipherCombiner = Cc["@fntechnologies.com/firefoxhelper/plaintextfnciphercombiner;1"].
+                createInstance(Ci.IPlainTextFNCipherCombiner);
     
 		if(!aPlainTextFNCipherCombiner)
 			return  false;
@@ -336,13 +323,10 @@ let OETController_ExtendedProp = {
 		let self  = this;
 		let editor =  self.originalEditor;
 		let is_fn_integrating =  false;
-		//if(g_OETManager.is_fn_integrating_page( editor.ownerDocument ) )
+		if(g_OETManager.is_fn_integrating_Editor( editor ) )
 		{
-			if(g_OETManager.is_fn_integrating_Editor( editor ) )
-			{
-				is_fn_integrating =  true;
-			}
-		}			
+			is_fn_integrating =  true;
+		}
 
 		var fncontent_array = matchFnDocIdFromString (content);
 		//has onlye 1 fndocid : already encrypted , do nothing;
@@ -359,7 +343,7 @@ let OETController_ExtendedProp = {
 			}
 			catch(err)
 			{
-			  return false;
+				return false;
 			}
                                            
 			afndocid = atob(afndocid);
@@ -501,7 +485,7 @@ let OETController_ExtendedProp = {
 		{
 		    if(!aOETController.initialized)//canceled
 		    {
-			    return ;  
+			return ;  
 		    }
 		    oFReaader = new aBrowserXULDOMWindow.FileReader();
 		    oFReaader.onload = function(oFRevent)
@@ -520,19 +504,18 @@ let OETController_ExtendedProp = {
 			let docinfo = fndocProcessor.m_docinfo;
 			if(docinfo[0] == 'text_plain')
 			{
-					
 			    showText(aOETController, gotBlob);
 			}
 			else if(docinfo[0] == 'image')
 			{
 				//todo
 			}        
-		 });
+		    });
     
 		fndocProcessor.on("error", function(errorMessage){
 		
 			//alert_log__("getplainTextFromFNDocID happen erros: " + errorMessage.msg);
-		});    
+		   });    
 		fndocProcessor.getDocById();
 	 
 		return ;
@@ -564,10 +547,6 @@ let OETController_ExtendedProp = {
 	 
 	sendoutData : function (evt)
 	{
-		//if(!g_OETManager.is_fn_integrating_page(this.originalEditor.ownerDocument) )
-		//{
-		//    return ;
-		//}
 		if(!g_OETManager.is_fn_integrating_Editor( this.originalEditor) )
 		{
 		    return ;
@@ -701,12 +680,12 @@ OETManager.prototype = {
 		var index = this.find_editorHandler_index(aEditor);
 		if(index  != -1) //  exists
 		{
-				var anOETController = this.editorHandlers[index];
-				if(anOETController)
-				{
-					anOETController.remove_handler();
-				}
-			  array_removeat(this.editorHandlers, index);
+			var anOETController = this.editorHandlers[index];
+			if(anOETController)
+			{
+				anOETController.remove_handler();
+			}
+			array_removeat(this.editorHandlers, index);
 		}
 	},
 	
@@ -815,17 +794,17 @@ OETManager.prototype = {
 		//remove_handler
 		for (var index = 0 ; index <  this.editorHandlers.length;  )
 		{
-				var anOETController = this.editorHandlers[index];
-				if(anOETController)
+			var anOETController = this.editorHandlers[index];
+			if(anOETController)
+			{
+				if( anOETController.originalEditor.ownerDocument == aDocument)
 				{
-					if( anOETController.originalEditor.ownerDocument == aDocument)
-					{
-						anOETController.remove_handler();
-						array_removeat(this.editorHandlers, index);
-						continue;
-					}
-			 }
-			 index++;
+					anOETController.remove_handler();
+					array_removeat(this.editorHandlers, index);
+					continue;
+				}
+			}
+			index++;
 		}	
 	
 		var i = 0;
@@ -904,7 +883,7 @@ OETManager.prototype = {
 			return editor.ContentText
 		}
 	},
-	
+	// this is a function provides insert invitation not for 'original' type of editor and not for integrated editor
 	append_invitation: function(editor, untrustedEmails_in, usingHTML)
 	{
 		let untrustedEmails = "";
@@ -932,10 +911,6 @@ OETManager.prototype = {
 		{
 			if(!g_OETManager.is_fn_integrating_Editor(editor ) )
 			{
-				//how to deal with the file selector?
-				//var fileCom = Components.classes["@fntechnologies.com/fileExplorer/fileSelectorCom;1"].getService().wrappedJSObject;
-				//var bInv = fileCom.needSendInvitation(editor.ownerDocument);
-				//if( bInv)
 				{
 					var FNJSAPICaller = Components.classes["@FNTechnologies.com/Mozilla/FNWebSvrJSHelper;1"].
 									createInstance(Components.interfaces.IFNWebSvrJSHelper);
@@ -953,6 +928,7 @@ OETManager.prototype = {
 	setEditorContent  :function(editor , content, usingHTML, append)
 	{
 		content =  "HJContentID:"+content;
+		//shouldSendInvitation is set before call this function 
 		if(editor.shouldSendInvitation !== undefined)	
 		{
 			if(editor.shouldSendInvitation == true)
@@ -982,24 +958,14 @@ OETManager.prototype = {
 				}//for
 				if(untrustedEmails.length > 0)
 				{
-					//if(g_OETManager.is_fn_integrating_page(editor.ownerDocument) )
-					//{
-					//	var fileCom = Components.classes["@fntechnologies.com/fileExplorer/fileSelectorCom;1"].getService().wrappedJSObject;
-					//	var bInv = fileCom.needSendInvitation(editor.ownerDocument);
-					//	if(g_OETManager.is_fn_integrating_page(editor.ownerDocument)  || bInv)
-					//	{
-							//if(g_OETManager.is_fn_integrating_Editor( editor)  || bInv) {
-								var FNJSAPICaller = Components.classes["@FNTechnologies.com/Mozilla/FNWebSvrJSHelper;1"].
-												createInstance(Components.interfaces.IFNWebSvrJSHelper);
-								FNJSAPICaller.sendInvitation(untrustedEmails, 
-								//this is a async function
-								function(data_ivi ){
-									content += "\n" + data_ivi;
-									g_OETManager.setEditorContent_inner_(editor , content, usingHTML, append, false);
-								} );
-							//}
-					//	}
-					//}
+					var FNJSAPICaller = Components.classes["@FNTechnologies.com/Mozilla/FNWebSvrJSHelper;1"].
+									createInstance(Components.interfaces.IFNWebSvrJSHelper);
+					FNJSAPICaller.sendInvitation(untrustedEmails, 
+					//this is a async function
+					function(data_ivi ){
+						content += "\n" + data_ivi;
+						g_OETManager.setEditorContent_inner_(editor , content, usingHTML, append, false);
+					} );
 				 }
 			
 			}//try

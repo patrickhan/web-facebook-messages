@@ -135,17 +135,17 @@ function on_fnaction_over(evt)
         if(evt.attrName == "fnremotehtmlreq-event-param"  )
         {
             if(evt.newValue=="true" || evt.newValue == "false")
-            {	
+            {
                 document.body.removeEventListener("DOMAttrModified",on_fnaction_over, false);
                 $(document.body).removeAttr("fnremotehtmlreq-event-param");
-                message_editor_group.tobox.removeAttr("fnremotehtmlreq-event-param");   
-                message_editor_group.editor.removeAttr("fnremotehtmlreq-event-param");   
+                message_editor_group.tobox.removeAttr("fnremotehtmlreq-event-param");
+                message_editor_group.editor.removeAttr("fnremotehtmlreq-event-param");
                 if (evt.newValue=="true") {
-                    //should add invitation
+                    //should add invitation . when it comes, it is from CIA mode only
                     var untrustedEmails =  $(document.body).attr("fnremotehtmlreq-event-param-subvalue");
                     $(document.body).removeAttr("fnremotehtmlreq-event-param-subvalue");
                     if (untrustedEmails.length > 0) {
-                        WEB_CMM.onprepare_send_invitation(untrustedEmails);
+                        WEB_CMM.onprepare_send_invitation( message_editor_group.editor.get(0), untrustedEmails);
                     }
                 }
                 //click the button again
@@ -166,7 +166,14 @@ function on_sendbox_click(evt)
     if (!fn_toggle_option ) {
         return;
     }
-    
+    /*
+    //this may have risk, if hj_cocntrol_release_once is not set, the message can not be sent anymore
+    if (evt.target.hj_cocntrol_release_once)
+        evt.target.hj_cocntrol_release_once =  false;
+        return ;
+    }
+    */
+    //if uers trigger more times just let it go
     if(!evt.target.hj_cocntrol || evt.target.hj_cocntrol == 0)
     {
         evt.target.hj_cocntrol = 1;
@@ -180,7 +187,7 @@ function on_sendbox_click(evt)
     evt.preventDefault();
                                     
     try{
-        //WEB_CMM.tell_to_box(message_editor_group.tobox.get(0))
+        WEB_CMM.tell_to_box(message_editor_group.tobox.get(0))
         
         WEB_CMM.tell_editor( message_editor_group.editor.get(0) )
         
@@ -189,6 +196,7 @@ function on_sendbox_click(evt)
         WEB_CMM.trigger_preSending()
         
         WEB_CMM.onAfter_preSending_event(on_fnaction_over);
+        
     }
     catch( err )
     {

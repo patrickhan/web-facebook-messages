@@ -19,7 +19,7 @@ var fn_web_mocktest_ns  = undefined === fn_web_mocktest_ns ? {}: fn_web_mocktest
     }
     
     //export
-    ns.testing = false ;//    
+    ns.testing = true ;//    
     ns.insert_data_ToBox = insert_data_ToBox;
     
 })(fn_web_mocktest_ns)

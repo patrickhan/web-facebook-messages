@@ -150,19 +150,19 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
         document.body.addEventListener("DOMAttrModified", callback, false);   
     }
     
-    function onprepare_send_invitation(untrustedEmails)
+    function onprepare_send_invitation(editor, untrustedEmails)
     {
         var transobj = {funname:"AppenddInvitation_ForWebPage", param:untrustedEmails};    	        
-        $(document.body).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
+        $(editor).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
         //$(document.body).trigger("fnRemoteHtmlReq-event") // is it work?
         var event = document.createEvent("HTMLEvents");        
         event.initEvent("fnRemoteHtmlReq-event", true, false);            
-        document.body.dispatchEvent(event);
+        editor.dispatchEvent(event);
     }
 
     //export
     //functions
-    ns.nolog = true;;
+    ns.nolog = false;
     ns.uniqID = uniqID;
     ns.log = log;
     ns.setflag_toggle_notshowToBox =  setflag_toggle_notshowToBox;

@@ -50,10 +50,11 @@ function SendInvitation_ForWebPage(doc, param, receipObj)
 	   alert(err);
 	}
 		
+
         if(doc.m_FN_receiptsObj !== undefined && doc.fntoggledPlg !== undefined
            && doc.m_FN_ToggledBackFndocids !== undefined &&
            doc.m_FN_ToggledBackFndocids.length > 0)
-        {  
+        {
            let receiptsStringFromReceiptsString = ""
            let receiptsobj = doc.m_FN_receiptsObj;
 		   
@@ -262,7 +263,7 @@ function setEditorobjForInivitation_forRemoteWebpage(doc, param, editObj)
 
 function AppenddInvitation_ForWebPage (doc, param, editObj) // new logic , should not be conflict with c++ logic
 {
-    let anOETController = g_OETManager.append_invitation(doc.fntoggledPlg, param);
+    let anOETController = g_OETManager.append_invitation(editObj, param);
 }
 
 function addReceiptsToAnInput_Forfacebook_replyMsg(doc, param, editObj)

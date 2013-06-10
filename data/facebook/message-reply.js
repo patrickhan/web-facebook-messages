@@ -130,12 +130,12 @@ function on_fnaction_over(evt)
                 $(document.body).removeAttr("fnremotehtmlreq-event-param");
                 message_editor_group.tobox.removeAttr("fnremotehtmlreq-event-param");   
                 message_editor_group.editor.removeAttr("fnremotehtmlreq-event-param");   
-               if (evt.newValue=="true") {
-                    //should add invitation
+                if (evt.newValue=="true") {
+                    //should add invitation . when it comes, it is from CIA mode only
                     var untrustedEmails =  $(document.body).attr("fnremotehtmlreq-event-param-subvalue");
                     $(document.body).removeAttr("fnremotehtmlreq-event-param-subvalue");
                     if (untrustedEmails.length > 0) {
-                        WEB_CMM.onprepare_send_invitation(untrustedEmails);
+                        WEB_CMM.onprepare_send_invitation(message_editor_group.editor.get(0), untrustedEmails);
                     }
                 }
                 //click the button again
@@ -259,7 +259,7 @@ function hook_Send_box()
     {
         var editor  = message_editor_group.editor.get(0);
         if (editor) {
-            //in this case, the keydown event is hook for the editor.parentNode 
+            //in this case, the keydown event is hooked for the editor.parentNode 
             editor.parentNode.addEventListener('keydown' , on_editorbox_keypress,true);
             //below is for reference for hooking the event later
             //editor.parentNode.addEventListener('keypress' , on_editorbox_keypress,true);
