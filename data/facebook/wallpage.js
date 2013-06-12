@@ -357,7 +357,9 @@ function is_my_page(url_spec)
     //match 'https://www.facebook.com/profile.php?id=550901973&ref=tn_tnmn
     //mismatch 'https://www.facebook.com/messages
     //facebook message page has their own js files 
-    
+    if ("https://www.facebook.com" == url_spec) {
+	return true; // home have a editor
+    }
     var match = reg_URL.test( url_spec );
     return match;
 }        
