@@ -11,7 +11,6 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
 {
     var charstoformid = '_0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'.split('');
     function uniqID(idlength) {
-        //var charstoformid = '_0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'.split('');
         if (! idlength) {
             idlength = Math.floor(Math.random() * charstoformid.length);
         }

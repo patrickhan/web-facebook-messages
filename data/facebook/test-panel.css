@@ -1,0 +1,23 @@
+/*
+ *  test-panel.css
+ *  this css for test panel 
+ *
+ */
+
+.fb-test-float
+{
+    background-color: rgb(0, 255, 128);
+    position: absolute;/*position: fixed;*/
+}
+
+.fb-test-bottom-right
+{
+    bottom: 0;
+    right: 0;
+}
+
+.fb-test-size
+{
+    width: 300px;
+    height: 300x;
+}
