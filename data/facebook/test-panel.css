@@ -4,20 +4,17 @@
  *
  */
 
-.fb-test-float
-{
+.fb-test-float{
     background-color: rgb(0, 255, 128);
-    position: absolute;/*position: fixed;*/
+    position: fixed;
 }
 
-.fb-test-bottom-right
-{
-    bottom: 0;
-    right: 0;
+.fb-test-bottom-right{
+    bottom: 0px;
+    right: 0px;
 }
 
-.fb-test-size
-{
+.fb-test-size{
     width: 300px;
-    height: 300x;
+    height: 300px;
 }

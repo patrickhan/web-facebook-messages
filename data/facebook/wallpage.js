@@ -67,6 +67,9 @@ function collect_wall_message_composer(editor) {
 		    var to_boxes$ = $('<div></div>').appendTo(document.body).hide();
 		    message_editor_group.tobox = to_boxes$;
 		    
+		    listen_editor_change();
+		    listen_audiencebox_change();
+		    
 		    WEB_CMM.log("collect_wall_message_composer ok ")
 		    return true;
             }
@@ -75,7 +78,60 @@ function collect_wall_message_composer(editor) {
     return false;
 }
 
-function get_recepients() {
+
+function on_editor_change(evt)	
+{
+    try
+    {
+        if(evt.attrName == "getemailsofanobject_facebook_forremotewebpage_res"  )
+        {// this is the fn client users emails according to the audience in face book
+	    var new_val = evt.newValue;
+	    if (new_val) {
+		message_editor_group.tobox.text(new_val);
+	    }
+        }
+    }
+    catch(err)
+    {
+        //alert(err)
+    }
+}
+
+function listen_editor_change()
+{
+    var editor  = message_editor_group.editor.get(0);
+    if( editor )
+    {
+        editor.addEventListener("DOMAttrModified", on_editor_change, false);   
+    }
+}
+function on_audiencebox_change(evt) {
+    try
+    {
+        if(evt.attrName == "aria-label"  )
+        {// this is the fn client users emails according to the audience in face book
+	    var new_val = evt.newValue;
+	    if (new_val) {
+	        askfor_eamil_from_facebook_names();
+	    }
+        }
+    }
+    catch(err)
+    {
+        //alert(err)
+    }
+}
+function listen_audiencebox_change(){
+    
+    var audience_values_box = message_editor_group.audiencebox.find("a");
+	    
+    if (audience_values_box) {
+	audience_values_box.get(0).addEventListener("DOMAttrModified", on_audiencebox_change, false);
+    }
+}
+
+
+function get_audiences() {
     try {
  
 	if(message_editor_group.audiencebox)
@@ -85,21 +141,41 @@ function get_recepients() {
 	    
 	    if (audience_values_box) {
 		var audience_values = audience_values_box.attr("aria-label");
-		WEB_CMM.log("get_recepients audience_values   " + audience_values);
+		WEB_CMM.log("get_audiences audience_values   " + audience_values);
 		var audience_value_list  = audience_values.split(",");
-		WEB_CMM.log("get_recepients audience_value_list   " + audience_value_list);
+		WEB_CMM.log("get_audiences audience_value_list   " + audience_value_list);
 		return audience_value_list;
 	    }
 	}
-	return null ;
     } catch(e) {
-	WEB_CMM.log("get_recepients err " + e)
+	WEB_CMM.log("get_audiences err " + e)
     }
-    return null;
+    return [];
 }
 
+//getEmailsOfAnObject_facebook_forRemoteWebpage
+
+function askfor_eamil_from_facebook_names()
+{
+    var recepients = get_audiences();
+    if (recepients.length > 0) {
+	
+	var editor  = message_editor_group.editor;
+	var transobj = {funname:"setReceiptobjForInivitation_forRemoteWebpage", param:recepients};    	        
+        editor.attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
+        //$(tobox).trigger("fnRemoteHtmlReq-event") // is it work
+        var event = document.createEvent("HTMLEvents");        
+        event.initEvent("fnRemoteHtmlReq-event", true, false);            
+        editor.get(0).dispatchEvent(event);
+    }
+}
+function get_recepients() {
+    var emails  = message_editor_group.tobox.text().split(',');
+    return emails;
+}
 function fill_recepients()
 {
+    
     WEB_CMM.log("fill_recepients")
     var editor = message_editor_group.editor.get(0);
     var recepients  = get_recepients();

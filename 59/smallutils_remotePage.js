@@ -14,6 +14,18 @@ function SwitchCanvasPointerEvents_ForWebPage(doc, param)
     }
 }
 
+function release_initationElements(doc)
+{
+    if(doc.fntoggledPlg !== undefined)
+    {
+        delete doc.fntoggledPlg;
+    }
+    if(doc.m_FN_receiptsObj !== undefined)
+    {
+        delete doc.m_FN_receiptsObj;
+    }
+}
+
 function SendInvitation_ForWebPage(doc, param, receipObj)
 {
     //doc.fntoggledPlg is the editor 
@@ -21,7 +33,7 @@ function SendInvitation_ForWebPage(doc, param, receipObj)
     //we trigger a event to do encryption by set the attribute 'togglecommandchecked =true' of the editor
 	
 	
-    if(doc.fntoggledPlg)
+    if(doc.fntoggledPlg !== undefined && doc.fntoggledPlg != null)
     {
 	    let anOETController = g_OETManager.find_editorHandler(doc.fntoggledPlg);
 	    if(anOETController)
@@ -49,12 +61,11 @@ function SendInvitation_ForWebPage(doc, param, receipObj)
 	{
 	   alert(err);
 	}
-		
-
+		console.log(doc.m_FN_receiptsObj + "   " + doc.fntoggledPlg + " dfsdfsd   " + doc.m_FN_ToggledBackFndocids + " sdfasdfasd " + doc.m_FN_ToggledBackFndocids.length);
         if(doc.m_FN_receiptsObj !== undefined && doc.fntoggledPlg !== undefined
            && doc.m_FN_ToggledBackFndocids !== undefined &&
            doc.m_FN_ToggledBackFndocids.length > 0)
-        {
+        {  
            let receiptsStringFromReceiptsString = ""
            let receiptsobj = doc.m_FN_receiptsObj;
 		   
@@ -72,7 +83,7 @@ function SendInvitation_ForWebPage(doc, param, receipObj)
            let isSendInivation = false;
            if(match != null && match.length > 0)
            {
-		let untrustedEmails ="";
+		        let untrustedEmails ="";
                 for(let i = 0; i < match.length; i++)
                 {
                     let aEmail = match[i];
@@ -108,7 +119,7 @@ function SendInvitation_ForWebPage(doc, param, receipObj)
                                 for(let fndocidCounter = 0; fndocidCounter < fndocids.length; ++fndocidCounter)
                                 {
                                     let fndocid = fndocids[fndocidCounter].fndocid; 
-				    let key =  fndocids[fndocidCounter].pkey;									
+				                    let key =  fndocids[fndocidCounter].pkey;					                    								
                                     addInvitationFndoc(fndocid, key);
                                 }    
                             }                                            
@@ -127,13 +138,14 @@ function SendInvitation_ForWebPage(doc, param, receipObj)
 			    toggleBack_v2(doc, doc.m_FN_ToggledBackFndocids, null, false); //false Don't set focus when write back
 			    if(isSendInivation == true)
                             {
-				doc.body.setAttribute("fnRemoteHtmlReq-event-param-subvalue", untrustedEmails);
+				                doc.body.setAttribute("fnRemoteHtmlReq-event-param-subvalue", untrustedEmails);
                                 doc.body.setAttribute("fnRemoteHtmlReq-event-param", "true");
-				
+				                release_initationElements(doc);
                             } 
                             else
                             {                            
                                 doc.body.setAttribute("fnRemoteHtmlReq-event-param", "false");
+                                release_initationElements(doc);
                             }
                         }
                     });
@@ -142,11 +154,13 @@ function SendInvitation_ForWebPage(doc, param, receipObj)
             else
             {                                        
                 doc.body.setAttribute("fnRemoteHtmlReq-event-param", "false");
+                release_initationElements(doc);
             }
         }
         else
         {                                    
             doc.body.setAttribute("fnRemoteHtmlReq-event-param", "false");
+            release_initationElements(doc);
         }
     }
 }
@@ -234,6 +248,7 @@ function RTEobjShowPlainTextMsgMixFormat_ForWebpage_V2(doc, param, rteobj)
 
 function addReceiptsToAnInput_ForWebPage(doc, param, inputEle)
 {
+    //inputEle.currentReaders !== undefined
     if(inputEle.currentReaders !== undefined)
     {
 	    let aEmail = param;		
@@ -268,22 +283,19 @@ function AppenddInvitation_ForWebPage (doc, param, editObj) // new logic , shoul
 
 function addReceiptsToAnInput_Forfacebook_replyMsg(doc, param, editObj)
 {
-    
     var to_box  = doc.getElementById(param);
     Components.utils.import("resource://browsercontent/FnGlobalObject.jsm");
     var pageMsg = doc.getElementById("pagelet_web_messenger");
     if(pageMsg == null) {
 	return;
     }
-    
     var objName = "webMessageEmails";
-    var emailObj = FnGlobalObject.getObject(objName, pageMsg);
-    
+    var emailObj = FnGlobalObject.getObject(objName, node);
     if(emailObj) {
-	
 	if(emailObj.length > 0) {
 	    //concat original emails
 	    emailObj = emailObj[0];
+	    g_OETManager.log(emailObj);
 	    if (to_box) {
 		to_box.innerHTML = emailObj;
 	    }
@@ -305,8 +317,6 @@ function addReceiptsToAnInput_Forfacebook_replyMsg(doc, param, editObj)
 	    }
 	}
     }
-    
-    
 }
 
 EcselfDefineGlobalScope.FnTextBoxBlurEvtProcess = function(doc, fnboxEle)
@@ -330,5 +340,27 @@ EcselfDefineGlobalScope.FnTextBoxBlurEvtProcess = function(doc, fnboxEle)
     }    
 }
 
+function getEmailsOfAnObject_facebook_forRemoteWebpage(doc, param, theobj)
+{
+    var chattersArray = param;
+    theobj.m_tempchattersArray = chattersArray;
+    var data = {"serviceName":"getImEmailByHandleAndName", "message": {
+        data : {"imName": "facebookName", "imHandle": chattersArray},
+        args : theobj,
+        finish: function(ret, ele1) {
+            let responseEmails = [];
+        	if(ret.length < ele1.m_tempchattersArray.length) {		        
+		        responseEmails.push("iva@fn.com");
+	        }	        
+	                	
+	        for(var i=0;i<ret.length;++i) {
+		        responseEmails.push(ret[i].emailAddress);
+	        }
+	        delete ele1.m_tempchattersArray;
+        	ele1.setAttribute("getemailsofanobject_facebook_forremotewebpage_res", JSON.stringify(responseEmails));
+        },
+    }};    
+    new MessageProcessor.MsgServer().sendMsg(doc, new MessageProcessor.MsgServer().newMsg("selfMessageProcessor", data));
+}
 
 
