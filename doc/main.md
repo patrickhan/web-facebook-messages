@@ -39,3 +39,15 @@ this button is for submit, hooke it
 <button value="1" class="_42ft _4jy0 _11b _4jy3 _4jy1 selected" type="submit">Post</button>
 
 we select method 2. It works and easy to be implemented
+
+js composing :
+http://addyosmani.com/writing-modular-js/
+https://blog.mozilla.org/dherman/2011/02/23/my-js-meetup-talk/
+
+mobile js lib : ember . 
+
+other:
+http://www.phpcompiler.org/articles/virtualinheritance.html
+
+Selenium automates browsers. That's it. What you do with that power is entirely up to you. Primarily it is for automating web applications for testing purposes, but is certainly not limited to just that. Boring web-based administration tasks can (and should!) also be automated as well.
+http://docs.seleniumhq.org/projects/ide/
