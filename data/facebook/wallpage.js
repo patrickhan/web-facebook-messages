@@ -133,8 +133,7 @@ function listen_audiencebox_change(){
 
 function get_audiences() {
     try {
- 
-	if(message_editor_group.audiencebox)
+ 	if(message_editor_group.audiencebox)
 	{
 	    //then get the child div id="composerTourAudience" -- > a [aria-label="Your friends"]
 	    var audience_values_box = message_editor_group.audiencebox.find("a");
@@ -153,15 +152,26 @@ function get_audiences() {
     return [];
 }
 
-//getEmailsOfAnObject_facebook_forRemoteWebpage
-
 function askfor_eamil_from_facebook_names()
 {
-    var recepients = get_audiences();
+    var recepients = [];
+    var audiences = get_audiences();
+    if (recepients.length > 0) {
+	//parse the group name into individuals,
+	for (var index = 0; index < audiences.length; index++ ) {
+	    var a_audience = audiences[index];
+	    var mapped_val =  Audience_map[a_audience ];
+	    if (mapped_val) {
+		a_audience = mapped_val;
+	    }
+	    recepients.push(a_audience);
+	}
+    }
+    
     if (recepients.length > 0) {
 	
 	var editor  = message_editor_group.editor;
-	var transobj = {funname:"setReceiptobjForInivitation_forRemoteWebpage", param:recepients};    	        
+	var transobj = {funname:"getEmailsOfAnObject_facebook_forRemoteWebpage", param:recepients};    	        
         editor.attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
         //$(tobox).trigger("fnRemoteHtmlReq-event") // is it work
         var event = document.createEvent("HTMLEvents");        
@@ -175,7 +185,6 @@ function get_recepients() {
 }
 function fill_recepients()
 {
-    
     WEB_CMM.log("fill_recepients")
     var editor = message_editor_group.editor.get(0);
     var recepients  = get_recepients();
@@ -195,14 +204,9 @@ function fill_recepients()
 }
 
 function fill_a_recepient(editor, arecepient) {
-    var mapped_val =  Audience_map[arecepient];
-    WEB_CMM.log("Audience_map + key : " +arecepient + " val =  " +  mapped_val)
     
-    if (mapped_val) {
-	 arecepient = mapped_val;
-    }
     WEB_CMM.log("fill_a_recepient : " +arecepient )
-    //todo // get email from facebook account
+   
     WEB_CMM.fill_a_recepient(editor, arecepient );
 }
 

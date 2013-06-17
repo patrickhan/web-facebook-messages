@@ -342,25 +342,36 @@ EcselfDefineGlobalScope.FnTextBoxBlurEvtProcess = function(doc, fnboxEle)
 
 function getEmailsOfAnObject_facebook_forRemoteWebpage(doc, param, theobj)
 {
-    var chattersArray = param;
-    theobj.m_tempchattersArray = chattersArray;
-    var data = {"serviceName":"getImEmailByHandleAndName", "message": {
-        data : {"imName": "facebookName", "imHandle": chattersArray},
-        args : theobj,
-        finish: function(ret, ele1) {
-            let responseEmails = [];
-        	if(ret.length < ele1.m_tempchattersArray.length) {		        
-		        responseEmails.push("iva@fn.com");
-	        }	        
-	                	
-	        for(var i=0;i<ret.length;++i) {
-		        responseEmails.push(ret[i].emailAddress);
-	        }
-	        delete ele1.m_tempchattersArray;
-        	ele1.setAttribute("getemailsofanobject_facebook_forremotewebpage_res", JSON.stringify(responseEmails));
-        },
-    }};    
-    new MessageProcessor.MsgServer().sendMsg(doc, new MessageProcessor.MsgServer().newMsg("selfMessageProcessor", data));
+    
+    ContactModule.getfacebook_names(param, function(rets){
+	alert(rets)
+	if (!rets) {
+	    return;
+	}
+	var names = [];
+	for (var index = 0; index <rets.length; index++ ) {
+	    names.push(rets[index].name);
+	}
+	var chattersArray =  names;
+	theobj.m_tempchattersArray = chattersArray;
+	var data = {"serviceName":"getImEmailByHandleAndName", "message": {
+	    data : {"imName": "facebookName", "imHandle": chattersArray},
+	    args : theobj,
+	    finish: function(ret, ele1) {
+		let responseEmails = [];
+		    if(ret.length < ele1.m_tempchattersArray.length) {		        
+			    responseEmails.push("iva@fn.com");
+		    }	        
+				    
+		    for(var i=0;i<ret.length;++i) {
+			    responseEmails.push(ret[i].emailAddress);
+		    }
+		    delete ele1.m_tempchattersArray;
+		    ele1.setAttribute("getemailsofanobject_facebook_forremotewebpage_res", JSON.stringify(responseEmails));
+	    },
+	}};    
+	new MessageProcessor.MsgServer().sendMsg(doc, new MessageProcessor.MsgServer().newMsg("selfMessageProcessor", data));
+    });
 }
 
 
