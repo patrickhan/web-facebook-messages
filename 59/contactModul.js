@@ -92,9 +92,9 @@ var ContactModule = {};
         var sql_all = sql_groupName_collection;
         if(sql_facebookName_collection.length > 0)
         {
-            sql_all =  " union " + sql_facebookName_collection;
+            sql_all +=  " union " + sql_facebookName_collection;
         }
-        alert(sql_all)
+        //log(sql_all)
         var sqltemplate = sql_all;
         var params=[];
         dataDBOper_Asyn_V2(sqltemplate, params, callback, false);        

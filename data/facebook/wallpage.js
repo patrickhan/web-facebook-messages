@@ -68,7 +68,10 @@ function collect_wall_message_composer(editor) {
 		    message_editor_group.tobox = to_boxes$;
 		    
 		    listen_editor_change();
+		    
 		    listen_audiencebox_change();
+		    askfor_eamil_from_facebook_names();//retrive the audiances once.
+		    
 		    
 		    WEB_CMM.log("collect_wall_message_composer ok ")
 		    return true;
@@ -85,6 +88,7 @@ function on_editor_change(evt)
     {
         if(evt.attrName == "getemailsofanobject_facebook_forremotewebpage_res"  )
         {// this is the fn client users emails according to the audience in face book
+	    aler("on_editor_change : getemailsofanobject_facebook_forremotewebpage_res " + evt.newValue)
 	    var new_val = evt.newValue;
 	    if (new_val) {
 		message_editor_group.tobox.text(new_val);
@@ -112,6 +116,7 @@ function on_audiencebox_change(evt) {
         {// this is the fn client users emails according to the audience in face book
 	    var new_val = evt.newValue;
 	    if (new_val) {
+		alert("on_audiencebox_change will call askfor_eamil_from_facebook_names")
 	        askfor_eamil_from_facebook_names();
 	    }
         }
@@ -142,7 +147,14 @@ function get_audiences() {
 		var audience_values = audience_values_box.attr("aria-label");
 		WEB_CMM.log("get_audiences audience_values   " + audience_values);
 		var audience_value_list  = audience_values.split(",");
+		//remove space
+		for (var index = 0; index < audience_value_list.length; index++ ) {
+		    var a_audience = audience_value_list[index];
+		    audience_value_list[index] = a_audience.replace(/^\s+|\s+$/g,'')
+		}
+		
 		WEB_CMM.log("get_audiences audience_value_list   " + audience_value_list);
+		//http.responseText.replace(/^\s+|\s+$/g,'');
 		return audience_value_list;
 	    }
 	}
@@ -156,7 +168,7 @@ function askfor_eamil_from_facebook_names()
 {
     var recepients = [];
     var audiences = get_audiences();
-    if (recepients.length > 0) {
+    if (audiences.length > 0) {
 	//parse the group name into individuals,
 	for (var index = 0; index < audiences.length; index++ ) {
 	    var a_audience = audiences[index];
@@ -167,9 +179,7 @@ function askfor_eamil_from_facebook_names()
 	    recepients.push(a_audience);
 	}
     }
-    
     if (recepients.length > 0) {
-	
 	var editor  = message_editor_group.editor;
 	var transobj = {funname:"getEmailsOfAnObject_facebook_forRemoteWebpage", param:recepients};    	        
         editor.attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                

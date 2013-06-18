@@ -342,9 +342,7 @@ EcselfDefineGlobalScope.FnTextBoxBlurEvtProcess = function(doc, fnboxEle)
 
 function getEmailsOfAnObject_facebook_forRemoteWebpage(doc, param, theobj)
 {
-    
     ContactModule.getfacebook_names(param, function(rets){
-	alert(rets)
 	if (!rets) {
 	    return;
 	}
@@ -352,12 +350,16 @@ function getEmailsOfAnObject_facebook_forRemoteWebpage(doc, param, theobj)
 	for (var index = 0; index <rets.length; index++ ) {
 	    names.push(rets[index].name);
 	}
+	alert( " before call MessageProcessor names " + names.toString() );
 	var chattersArray =  names;
 	theobj.m_tempchattersArray = chattersArray;
 	var data = {"serviceName":"getImEmailByHandleAndName", "message": {
 	    data : {"imName": "facebookName", "imHandle": chattersArray},
 	    args : theobj,
 	    finish: function(ret, ele1) {
+		alert( " MessageProcessor.MsgServer().sendMsg(doc, new MessageProcessor.MsgServer().newMsg('selfMessageProcessor', data)); call back");
+		alert( " MessageProcessor in call back + ret " + ret.toString() );
+		alert( " MessageProcessor in call back + ele1 " + ele1.toString() );
 		let responseEmails = [];
 		    if(ret.length < ele1.m_tempchattersArray.length) {		        
 			    responseEmails.push("iva@fn.com");
@@ -366,6 +368,7 @@ function getEmailsOfAnObject_facebook_forRemoteWebpage(doc, param, theobj)
 		    for(var i=0;i<ret.length;++i) {
 			    responseEmails.push(ret[i].emailAddress);
 		    }
+		    alert( " MessageProcessor call back + responseEmails " + responseEmails.toString() );
 		    delete ele1.m_tempchattersArray;
 		    ele1.setAttribute("getemailsofanobject_facebook_forremotewebpage_res", JSON.stringify(responseEmails));
 	    },
