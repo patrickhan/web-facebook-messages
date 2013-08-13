@@ -41,40 +41,42 @@ function collect_wall_message_composer(editor) {
     if(editor.tagName == "TEXTAREA" && editor.getAttribute("onkeydown") != null &&
 	                   editor.getAttribute("onkeydown").indexOf("window") == 0)
     {
-        ///ancestor form tag action="/ajax/updatestatus.php"
+        //ancestor form tag action="/ajax/updatestatus.php"
        var form$ =  $(editor).parents("form[action='/ajax/updatestatus.php']");
        //var form$ =  $(editor).parents("form:first");
        if (form$ ) {
             //then get the child div id="composerTourAudience" -- > a [aria-label="Your friends"]
             //recepeint
-	    //its id changed , using classs "uiSelector inlineBlock audienceSelector composerAudienceSelector dynamicIconSelector uiSelectorRight uiSelectorNormal uiSelectorDynamicLabel uiSelectorDynamicTooltip"
-            var audience = form$.find("div[class~='composerAudienceSelector']");
+			//its id changed , using classs "uiSelector inlineBlock audienceSelector composerAudienceSelector dynamicIconSelector uiSelectorRight uiSelectorNormal uiSelectorDynamicLabel uiSelectorDynamicTooltip"
+            var audience$ = form$.find("div[class~='composerAudienceSelector']");
 
             //post button
             //<button value="1" class="_42ft _4jy0 _11b _4jy3 _4jy1 selected" type="submit">Post</button>
-            var submit_button = form$.find("button[type='submit']");
+            var submit_button$ = form$.find("button[type='submit']");
 	    
             message_editor_group.editor = $(editor);
-	    editor.wrappedJSObject.fnhookedFlag = true; 
-            message_editor_group.sendbox = submit_button;
-            message_editor_group.audiencebox = audience;
-            if (message_editor_group.editor &&
-                message_editor_group.sendbox &&
-                message_editor_group.audiencebox) {
-		    hook_Send_box();
+			editor.wrappedJSObject.fnhookedFlag = true; 
+            message_editor_group.sendbox = submit_button$;
+            message_editor_group.audiencebox = audience$;
+            if ( (message_editor_group.editor && message_editor_group.editor.length > 0)
+                 &&(message_editor_group.sendbox && message_editor_group.sendbox.length > 0)
+                 &&(message_editor_group.audiencebox && message_editor_group.audiencebox.length > 0) 
+				 )
+			{
+		       hook_Send_box();
 		    
-		    //create a to box
-		    var to_boxes$ = $('<div></div>').appendTo(document.body).hide();
-		    message_editor_group.tobox = to_boxes$;
-		    
-		    listen_editor_change();
-		    
-		    listen_audiencebox_change();
-		    askfor_eamil_from_facebook_names();//retrive the audiances once.
-		    
-		    
-		    WEB_CMM.log("collect_wall_message_composer ok ")
-		    return true;
+				//create a to box
+				var to_boxes$ = $('<div></div>').appendTo(document.body).hide();
+				message_editor_group.tobox = to_boxes$;
+				
+				listen_editor_change();
+				
+				listen_audiencebox_change();
+				askfor_eamil_from_facebook_names();//retrive the audiances once.
+				
+				
+				WEB_CMM.log("collect_wall_message_composer ok ")
+				return true;
             }
        }
     }
@@ -85,13 +87,13 @@ function collect_wall_message_composer(editor) {
 function on_editor_change(evt)	
 {
     try
-    {
+    {   
         if(evt.attrName == "getemailsofanobject_facebook_forremotewebpage_res"  )
         {// this is the fn client users emails according to the audience in face book
-	    aler("on_editor_change : getemailsofanobject_facebook_forremotewebpage_res " + evt.newValue)
-	    var new_val = evt.newValue;
-	    if (new_val) {
-		message_editor_group.tobox.text(new_val);
+			//alert("on_editor_change : getemailsofanobject_facebook_forremotewebpage_res " + evt.newValue)
+			var new_val = evt.newValue;
+			if (new_val) {
+			message_editor_group.tobox.text(new_val);
 	    }
         }
     }
@@ -106,7 +108,8 @@ function listen_editor_change()
     var editor  = message_editor_group.editor.get(0);
     if( editor )
     {
-        editor.addEventListener("DOMAttrModified", on_editor_change, false);   
+        editor.addEventListener("DOMAttrModified", on_editor_change, false);  
+		WEB_CMM.log("editor.addEventListener('DOMAttrModified' , on_editor_change " );
     }
 }
 function on_audiencebox_change(evt) {
@@ -114,11 +117,11 @@ function on_audiencebox_change(evt) {
     {
         if(evt.attrName == "aria-label"  )
         {// this is the fn client users emails according to the audience in face book
-	    var new_val = evt.newValue;
-	    if (new_val) {
-		alert("on_audiencebox_change will call askfor_eamil_from_facebook_names")
-	        askfor_eamil_from_facebook_names();
-	    }
+			var new_val = evt.newValue;
+			if (new_val) {
+				WEB_CMM.log("on_audiencebox_change" + new_val);  
+				askfor_eamil_from_facebook_names();
+			}
         }
     }
     catch(err)
@@ -163,30 +166,31 @@ function get_audiences() {
     }
     return [];
 }
-
+ 
 function askfor_eamil_from_facebook_names()
 {
     var recepients = [];
     var audiences = get_audiences();
     if (audiences.length > 0) {
-	//parse the group name into individuals,
-	for (var index = 0; index < audiences.length; index++ ) {
-	    var a_audience = audiences[index];
-	    var mapped_val =  Audience_map[a_audience ];
-	    if (mapped_val) {
-		a_audience = mapped_val;
-	    }
-	    recepients.push(a_audience);
-	}
+		//parse the group name into individuals,
+		for (var index = 0; index < audiences.length; index++ ) {
+			var a_audience = audiences[index];
+			var mapped_val =  Audience_map[a_audience ];
+			if (mapped_val) {
+			a_audience = mapped_val;
+			}
+			recepients.push(a_audience);
+		}
     }
+	
     if (recepients.length > 0) {
-	var editor  = message_editor_group.editor;
-	var transobj = {funname:"getEmailsOfAnObject_facebook_forRemoteWebpage", param:recepients};    	        
-        editor.attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
-        //$(tobox).trigger("fnRemoteHtmlReq-event") // is it work
-        var event = document.createEvent("HTMLEvents");        
-        event.initEvent("fnRemoteHtmlReq-event", true, false);            
-        editor.get(0).dispatchEvent(event);
+		var editor  = message_editor_group.editor;
+		var transobj = {funname:"getEmailsOfAnObject_facebook_forRemoteWebpage", param:recepients};    	        
+		editor.attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
+		//editor.trigger("fnRemoteHtmlReq-event") // is it work
+		var event = document.createEvent("HTMLEvents");        
+		event.initEvent("fnRemoteHtmlReq-event", true, false);            
+		editor.get(0).dispatchEvent(event);
     }
 }
 function get_recepients() {
@@ -309,7 +313,7 @@ function hook_Send_box()
     WEB_CMM.log("hook_Send_box 0 ")
     if( message_editor_group.sendbox)
     {
-	WEB_CMM.log("hook_Send_box 1 ")
+		WEB_CMM.log("hook_Send_box 1 ")
         var send_obj = message_editor_group.sendbox;
         if(send_obj)
         {
@@ -340,10 +344,10 @@ function hookedToggleBackFunctionHandle(evt) {
 
 function listen_fn_togglebackfinished( )
 {
-    if(message_editor_group.editor)
+    /*if(message_editor_group.editor)
     {
         message_editor_group.editor.get(0).addEventListener("fn_togglebackfinished", hookedToggleBackFunctionHandle, false);
-    }
+    }*/
 }
 
 function _FNToggle_editor_focus_listener(evt) {
@@ -382,9 +386,9 @@ self.port.on("getEditors", function(url_spec) {
 
     if( is_my_page(url_spec) )
     {
-	WEB_CMM.log("is_my_page")
+		WEB_CMM.log(" face book wall is_my_page")
         add_FNToggle_editor_focus_listener();
-	WEB_TEST.create_test_panel();
+		//WEB_TEST.create_test_panel();
     }
 
 });

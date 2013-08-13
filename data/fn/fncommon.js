@@ -25,7 +25,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     {
         if( !ns.nolog)
         {
-            console.log("*****" + msg  );
+            console.error("*****" + msg  );
         }
     }
     
@@ -90,7 +90,6 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     {
         var transobj = {funname:"setReceiptobjForInivitation_forRemoteWebpage", param:null};    	        
         $(tobox).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
-        //$(tobox).trigger("fnRemoteHtmlReq-event") // is it work
         var event = document.createEvent("HTMLEvents");        
         event.initEvent("fnRemoteHtmlReq-event", true, false);            
         tobox.dispatchEvent(event);
@@ -100,7 +99,6 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     {
         var transobj = {funname:"addReceiptsToAnInput_ForWebPage", param:email};    	        
         $(editor).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));              
-        //$(editor).trigger("fnRemoteHtmlReq-event") // is it work
         var event = document.createEvent("HTMLEvents");        
         event.initEvent("fnRemoteHtmlReq-event", true, false);            
         editor.dispatchEvent(event)   
@@ -113,7 +111,6 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
         var emailAddrFinder = new RegExp('(\\w+\\.)*\\w+@(\\w+\\.)+[A-Za-z]+', 'gm');
         var htmlString = tobox.innerHTML;
         if (tobox.tagName === "INPUT" || tobox.tagName === "TEXTAREA") {
-            //code
             htmlString  = tobox.value;
         }
         var results = htmlString.match(emailAddrFinder);
@@ -128,7 +125,6 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     {
         var transobj = {funname:"setEditorobjForInivitation_forRemoteWebpage", param:null};    	        
         $(editor).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
-        //$(editor).trigger("fnRemoteHtmlReq-event") // is it work
         var event = document.createEvent("HTMLEvents");        
         event.initEvent("fnRemoteHtmlReq-event", true, false);            
         editor.dispatchEvent(event);
@@ -138,7 +134,6 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     {
         var transobj = {funname:"SendInvitation_ForWebPage", param:null};    	        
         $(document.body).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
-        //$(document.body).trigger("fnRemoteHtmlReq-event") // is it work?
         var event = document.createEvent("HTMLEvents");        
         event.initEvent("fnRemoteHtmlReq-event", true, false);            
         document.body.dispatchEvent(event);
@@ -153,11 +148,61 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     {
         var transobj = {funname:"AppenddInvitation_ForWebPage", param:untrustedEmails};    	        
         $(editor).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
-        //$(document.body).trigger("fnRemoteHtmlReq-event") // is it work?
         var event = document.createEvent("HTMLEvents");        
         event.initEvent("fnRemoteHtmlReq-event", true, false);            
         editor.dispatchEvent(event);
     }
+	
+	//FN RTE related
+	function fnrte_util_clean_content(afnrte)
+	{
+		try
+		{
+			var rteobj = afnrte['wrappedJSObject']; //rteobj is a plugin in webpage
+			rteobj.ShowPlainTextMsg("", "", "") ;  
+		}
+		catch(err)
+        {
+			log("excpetion : util_clean_fndocid_from_fnrte : " + err  );
+        }	
+	}
+	
+	function fnrte_util_get_fndocid(afnrte)
+	{
+		var fndocid="";
+		try
+		{
+			var rteobj = afnrte['wrappedJSObject']; //rteobj is a plugin in webpage  and we are in sandbox , Notice the wrappedJSObject is workign or not
+			var ret_content = rteobj.GetFNRTEContent();    
+			ret_content = ret_content.replace("BEGIN_FN_SECURE_MESSAGE_", "");
+			ret_content = ret_content.replace("_END_FN_SECURE_MESSAGE", "");
+			
+	        var sentdataObj = JSON.parse(rteobj.GetSendData(ret_content) );        
+			if(sentdataObj.length <= 1)
+			{
+				WEB_CMM.log("error: rteobj plugin call GetSendData : length <= 1"  );
+			}
+			else
+			{	   	      
+			    for(var counter =0; counter <sentdataObj.length; ++counter)
+			    {
+				    var areader = sentdataObj[counter];
+				    if(areader.ownerid == "fnDocId")
+				    {
+					   fndocid = atob(areader.pkey);
+					   break;
+				    }
+				}
+			}
+		}
+		catch(err)
+        {
+			log("excpetion : util_get_fndocid_from_fnrte : " + err  );
+            return null;
+        }
+		log("util_get_fndocid_from_fnrte is :  " + fndocid  );		
+		return fndocid;
+    }	
 
     //export
     //functions
@@ -175,6 +220,10 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     ns.trigger_preSending = trigger_preSending;
     ns.onAfter_preSending_event = onAfter_preSending_event;
     ns.onprepare_send_invitation = onprepare_send_invitation;
+	
+	//fntre
+	ns.fnrte_util_clean_content = fnrte_util_clean_content;
+	ns.fnrte_util_get_fndocid =  fnrte_util_get_fndocid;
     
     //const values
     ns.PROJECT_NAME_PREFIX   = "fbm";
@@ -184,8 +233,5 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     ns.ROLE_NAME_SEND_BOX = "send_box_";
     ns.ROLE_NAME_SEND_BY_KEYPRESS_ENTER = "keypress_enter";
     ns.ROLE_NAME_SEND_BY_MOUSE_CLICK = "mouse_click";
-    //const FN_INTEGRATING_ATTR_NAME = "fn-integrating";
-    //const FN_INTEGRATING_ATTR_VALUE = "emailbody";
-    //new_message_editor_group.editor.removeAttr("fn-integrating") == "emailbody";
     
 })(fn_web_common_ns);

@@ -37,7 +37,7 @@ function find_Editor_group_replay_Message()
     var a_id = WEB_CMM.uniqID(20);
     var role_name = WEB_CMM.PROJECT_NAME_PREFIX + WEB_CMM.INTEGRATING_ROLE_NAME + a_id;
     // find editor
-    if(!message_editor_group.editor)
+    if(!message_editor_group.editor || message_editor_group.editor.length == 0 )
     {
         var editors$ = $(selector_editor_replay_Message);
         
@@ -55,7 +55,7 @@ function find_Editor_group_replay_Message()
     }
   
     //find send button
-    if(!message_editor_group.sendbox)
+    if(!message_editor_group.sendbox || message_editor_group.sendbox.length == 0)
     {
         var send_boxes$ = $(selector_sendbox_replay_Message);
       
@@ -73,7 +73,7 @@ function find_Editor_group_replay_Message()
     }
   
     //recepient box
-    if(!message_editor_group.tobox)
+    if(!message_editor_group.tobox || message_editor_group.tobox.length == 0)
     {
         var to_boxes$ = $('<div></div>').appendTo(document.body).hide();
         to_boxes$.attr(role_name, WEB_CMM.ROLE_NAME_TO_BOX);
@@ -195,7 +195,6 @@ function fill_a_recepient_reply_message(editor, tobox)
 {
     var transobj = {funname:"addReceiptsToAnInput_Forfacebook_replyMsg", param:tobox.id};    	        
     $(editor).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));              
-    //$(editor).trigger("fnRemoteHtmlReq-event") // is it work
     var event = document.createEvent("HTMLEvents");        
     event.initEvent("fnRemoteHtmlReq-event", true, false);            
     editor.dispatchEvent(event)   
@@ -209,8 +208,6 @@ function sending_msg_routing() {
         WEB_CMM.tell_editor( message_editor_group.editor.get(0) );
         
         fill_a_recepient_reply_message(message_editor_group.editor.get(0), message_editor_group.tobox.get(0));
-        
-        //WEB_CMM.fill_recepients( message_editor_group.editor.get(0), message_editor_group.tobox.get(0) );
         
         WEB_CMM.trigger_preSending();
         
@@ -267,10 +264,10 @@ function hook_Send_box()
             //below is for reference for hooking the event later
             //editor.parentNode.addEventListener('keypress' , on_editorbox_keypress,true);
             //editor.parentNode.addEventListener('keyup' , on_editorbox_keypress,true);
-            editor.addEventListener("fn_togglebackfinished", function(evt){
+            /*editor.addEventListener("fn_togglebackfinished", function(evt){
                                 call_simulate_mouse_click_jquery(  message_editor_group.sendbox, 100)
                             }, false);
-            
+            */
             
         }
     }

@@ -51,3 +51,6 @@ http://www.phpcompiler.org/articles/virtualinheritance.html
 
 Selenium automates browsers. That's it. What you do with that power is entirely up to you. Primarily it is for automating web applications for testing purposes, but is certainly not limited to just that. Boring web-based administration tasks can (and should!) also be automated as well.
 http://docs.seleniumhq.org/projects/ide/
+
+python:
+pyqt, skypepy, installtool, egg, wxpython,

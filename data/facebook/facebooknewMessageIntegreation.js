@@ -1,3 +1,4 @@
+//this is not use in functions
 (function(){
     getNodesByXpath = function(doc, aExpr)
 	{

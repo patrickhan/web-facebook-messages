@@ -33,13 +33,13 @@ function find_Editor_group()
   var a_id = WEB_CMM.uniqID(20);
   var role_name = WEB_CMM.PROJECT_NAME_PREFIX + WEB_CMM.INTEGRATING_ROLE_NAME + a_id;
   // find editor
-  if(!message_editor_group.editor)
+  if(!message_editor_group.editor || message_editor_group.editor.length == 0)
   {
     var editors$ = $(selector_editor);
 
     var log_str = "find edtiors count is : " ;
     log_str += editors$.length;
-    WEB_CMM.log( log_str + " " +a_id );
+    WEB_CMM.log( "facebook message-new : " + log_str + " " +a_id );
 
     if(editors$.length == 1)//shoult there is only one
     {
@@ -51,13 +51,13 @@ function find_Editor_group()
   }
   
   //find send button
-  if(!message_editor_group.sendbox)
+  if(!message_editor_group.sendbox  || message_editor_group.sendbox.length == 0)
   {
     var send_boxes$ = $(selector_sendbox);
 
     var log_str = "find sendbox count is : " ;
     log_str += send_boxes$.length;
-    WEB_CMM.log( log_str + " " +a_id );
+    WEB_CMM.log( "facebook message-new : " + log_str + " " +a_id );
 
     if(send_boxes$.length == 1)//shoult there is only one
     {
@@ -68,13 +68,13 @@ function find_Editor_group()
   }
   
   //recepient box
-    if(!message_editor_group.tobox)
+    if(!message_editor_group.tobox || message_editor_group.tobox.length == 0)
     {
         var to_boxes$ =  $.xpath(selector_tobox).next("td");
         
         var log_str = "find to_boxe count is : " ;
         log_str += to_boxes$.length;
-        WEB_CMM.log( log_str + " " +a_id );
+        WEB_CMM.log( "facebook message-new : " + log_str + " " +a_id );
       
         if(to_boxes$.length == 1)//shoult there is only one
         {
@@ -85,7 +85,6 @@ function find_Editor_group()
         }
     }
 
-  find_Editor_group_test(a_id);
 }
 
 function clean_Editor_group()
@@ -94,10 +93,9 @@ function clean_Editor_group()
     if( message_editor_group.editor)
     {
         delete message_editor_group.editor.get(0).wrappedJSObject.fnhookedFlag;//unsafe 
-        WEB_CMM.log("clean " +  "editor_group.editor  " + message_editor_group.editor);
+        WEB_CMM.log("facebook message-new :  clean " +  "editor_group.editor  " + message_editor_group.editor);
         message_editor_group.editor.removeAttr(role_name);
-        //message_editor_group.editor.removeAttr("fn-toggle-option");
-        WEB_CMM.log("clean " + "editors removeAttr " + role_name);
+        WEB_CMM.log("facebook message-new : clean " + "editors removeAttr " + role_name);
         message_editor_group.editor = null;
     }
 
@@ -105,18 +103,16 @@ function clean_Editor_group()
     {
         unhook_Send_box();
         message_editor_group.sendbox.removeAttr(role_name);
-        WEB_CMM.log("clean " +  "sendbox removeAttr " + role_name);
+        WEB_CMM.log("facebook message-new : clean " +  "sendbox removeAttr " + role_name);
         message_editor_group.sendbox =  null;
     }
 
     if( message_editor_group.tobox)
     {
         message_editor_group.tobox.removeAttr(role_name);
-        WEB_CMM.log("clean " + "tobox removeAttr +  " + role_name);
+        WEB_CMM.log("facebook message-new : clean " + "tobox removeAttr +  " + role_name);
         message_editor_group.tobox =  null;
     }
-    
-    clean_Editor_group_test();
 }
 
 function call_simulate_mouse_click_jquery( box_obj$, timeout)
@@ -132,6 +128,7 @@ function on_fnaction_over(evt)
 {
     try
     {
+		WEB_CMM.log("facebook message-new : on_fnaction_over  " );
         if(evt.attrName == "fnremotehtmlreq-event-param"  )
         {
             if(evt.newValue=="true" || evt.newValue == "false")
@@ -141,10 +138,12 @@ function on_fnaction_over(evt)
                 message_editor_group.tobox.removeAttr("fnremotehtmlreq-event-param");
                 message_editor_group.editor.removeAttr("fnremotehtmlreq-event-param");
                 if (evt.newValue=="true") {
+					WEB_CMM.log("facebook message-new : on_fnaction_over  evt.newValue==true " );
                     //should add invitation . when it comes, it is from CIA mode only
                     var untrustedEmails =  $(document.body).attr("fnremotehtmlreq-event-param-subvalue");
                     $(document.body).removeAttr("fnremotehtmlreq-event-param-subvalue");
                     if (untrustedEmails.length > 0) {
+						WEB_CMM.log("facebook message-new : on_fnaction_over  untrustedEmails "  + untrustedEmails.toString() );
                         WEB_CMM.onprepare_send_invitation( message_editor_group.editor.get(0), untrustedEmails);
                     }
                 }
@@ -161,6 +160,7 @@ function on_fnaction_over(evt)
 
 function on_sendbox_click(evt)
 {
+	WEB_CMM.log("facebook message-new : on_sendbox_click  " );
     //not fn toggle, just return 
     var fn_toggle_option = message_editor_group.editor.attr('fn-toggle-option');
     if (!fn_toggle_option ) {
@@ -174,6 +174,8 @@ function on_sendbox_click(evt)
     }
     */
     //if uers trigger more times just let it go
+	WEB_CMM.log("facebook message-new : on_sendbox_click  evt.target.hj_cocntrol : " + evt.target.hj_cocntrol );
+	
     if(!evt.target.hj_cocntrol || evt.target.hj_cocntrol == 0)
     {
         evt.target.hj_cocntrol = 1;
@@ -181,6 +183,7 @@ function on_sendbox_click(evt)
     else
     {
         evt.target.hj_cocntrol = 0;
+		WEB_CMM.log("facebook message-new : on_sendbox_click  return 2dn time" );
         return;
     }
     evt.stopPropagation();
@@ -192,7 +195,7 @@ function on_sendbox_click(evt)
         WEB_CMM.tell_editor( message_editor_group.editor.get(0) )
         
         WEB_CMM.fill_recepients( message_editor_group.editor.get(0), message_editor_group.tobox.get(0) )
-        
+        //alert("WEB_CMM.trigger_preSending")
         WEB_CMM.trigger_preSending()
         
         WEB_CMM.onAfter_preSending_event(on_fnaction_over);
@@ -212,17 +215,21 @@ function hook_Send_box()
         if(send_obj)
         {
             send_obj.get(0).parentNode.addEventListener('click' , on_sendbox_click,true);
+			WEB_CMM.log("facebook message-new : addEventListener sendbox click " );
         }
     }
-    if(message_editor_group.editor)
+    /*if(message_editor_group.editor)
     {
         var editor  = message_editor_group.editor.get(0);
         if (editor) {
             editor.addEventListener("fn_togglebackfinished", function(evt){
+								
+								WEB_CMM.log("facebook message-new : on event fn_togglebackfinished  will call_simulate_mouse_click_jquery" );
                                 call_simulate_mouse_click_jquery(  message_editor_group.sendbox, 100)
                             }, false);
+			WEB_CMM.log("facebook message-new : editor: addEventListener fn_togglebackfinished  " );
         }
-    }
+    }*/
 }
 
 function unhook_Send_box()
@@ -233,18 +240,9 @@ function unhook_Send_box()
         if(send_obj)
         {
             send_obj.get(0).parentNode.removeEventListener('click' , on_sendbox_click,true);
+			WEB_CMM.log("facebook message-new : removeEventListener sendbox click " );
         }
     }
-}
-
-function find_Editor_group_test(a_id)
-{
-    //to do: plan to open a panel or frame to tell the manager the page status with QUint
-}
-
-function clean_Editor_group_test()
-{
-    //to do: plan to  tell the manager the page status in a panel or a frame  with QUint
 }
 
 function is_my_page(url_spec)
@@ -254,18 +252,6 @@ function is_my_page(url_spec)
     return match;
 }
 
-/*
- self.port.on("send-message", function(data) {
-    if( is_my_page(data) && message_editor_group.sendbox)
-    {
-        var send_obj = message_editor_group.sendbox;
-        if(send_obj)
-        {
-            call_simulate_mouse_click_jquery(send_obj.parent(), 1 );
-        }
-    }
-});
-*/
 
 self.port.on("getEditors", function(url_spec) {
 
@@ -298,5 +284,3 @@ id="u_0_1g"><input type="hidden" name="fb_dtsg" value="AQAqKbtk" autocomplete="o
 */
 })();
 
-///for comment reply:
-///textarea class="textInput mentionsTextarea uiTextareaAutogrow uiTextareaNoResize UFIAddCommentInput"  name="add_comment_text_text"

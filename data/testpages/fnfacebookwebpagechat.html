@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+  <head>
+    <title>FN facebook msg</title>
+  </head>
+  <body>
+    <link rel="stylesheet" href="chat.css" type="text/css">
+	<div id="w">
+	<div id="z">
+	</div>
+	<div class="fn-facebook-chat">
+	  <div class="fn-facebook-chat-title">
+	  <a>FN chat UI</a><a class="close-button">x</a>
+	  </div>
+	  <div class="fn-facebook-chat-uppart" >
+	    <object type="application/fn-richeditor-proxy" class="RichTextEditorR"  >
+		  <param name="create_param" value="&winmode=readonly&scrollintoview=true"/>
+		</object>
+      </div>
+	  <div class="fn-facebook-chat-downpart"  >
+	   <span class="RichTextEditorS-holder">
+        <object type="application/fn-richeditor-proxy" class="RichTextEditorS"  >
+		</object>
+		</span>
+		<a class="send-button">&#8629</a>
+	  </div>	  
+	</div>
+	</div>
+  </body>
+</html>
+
+<!--
+<div class="fn-facebook-chat" style="width:260px; height:260px;overflow:hidden;position:relative"><div class="fn-facebook-chat-uppart" style="border:1px solid #CCCCCC;	overflow:hidden; width:260px; height:232px;"> <object type="application/fn-richeditor-proxy" id="RichTextEditorR" style=" width:258px; height:232px;"> <param name="create_param" value="&winmode=readonly&scrollintoview=true"/> </object></div><div class="fn-facebook-chat-downpart" style="border:1px solid #CCCCCC; margin-top:-1px;overflow:hidden; width:260px; height:25px;"><object type="application/fn-richeditor-proxy" id="RichTextEditorS" style="margin-left:-4px; margin-top:-28px; width:263px; height:55px;"></object></div></div>
+-->
+
+<!-- 
+{594D0C6A-C6BB-4875-8164-3776586BB9A2}\content\webpgjs\smallutils.js 
+function userFireClickOnInputElementForWebpage(doc, param, theInputEle)
+{
+    let evt = doc.createEvent("HTMLEvents");
+    evt.initCustomEvent("FnInputEleFocus", true, false, null);
+    theInputEle.dispatchEvent(evt);
+}
+-->
