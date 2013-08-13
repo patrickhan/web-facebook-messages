@@ -30,7 +30,7 @@ def copytofolder2(src, dst):
     print 'it is ok'
 
 dir_src = ur"D:/ffaddonsdk110/addon-sdk-1.11/addon-sdk-1.11/web-facebook-messages/data/facebook/"
-dir_dest = ur"C:/Program Files/Federated Networks/HackJacket/HackJacketA/extensions/facebook@jetpack/resources/facebook/data/facebook/"
+dir_dest = ur"C:/Program Files/Federated Networks/HackJacket/HackJacketA/extensions/facebook@federatednetworks.com/resources/facebook/data/facebook/"
 
 ''''
 can not use string like this
@@ -41,14 +41,15 @@ dir1 = ur"D:\ffaddonsdk110\addon-sdk-1.11\addon-sdk-1.11\web-facebook-messages\d
 copytofolder2(dir_src, dir_dest)
 
 
+'''
 dir_scr1 = ur"D:/ffaddonsdk110/addon-sdk-1.11/addon-sdk-1.11/web-facebook-messages/59/"
 dir_dest1 = ur"C:/Program Files/Federated Networks/HackJacket/HackJacketA/extensions/{594D0C6A-C6BB-4875-8164-3776586BB9A2}/content/webpgjs/"
 
 copytofolder2(dir_scr1, dir_dest1)
-
+'''
 
 dir_src2 = ur"D:/ffaddonsdk110/addon-sdk-1.11/addon-sdk-1.11/web-facebook-messages/data/fn/"
-dir_dest2 = ur"C:/Program Files/Federated Networks/HackJacket/HackJacketA/extensions/facebook@jetpack/resources/facebook/data/fn/"
+dir_dest2 = ur"C:/Program Files/Federated Networks/HackJacket/HackJacketA/extensions/facebook@federatednetworks.com/resources/facebook/data/fn/"
 
 copytofolder2(dir_src2, dir_dest2)
 
