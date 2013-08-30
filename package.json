@@ -3,7 +3,7 @@
     "license": "MPL 2.0", 
     "author": "Woody", 
     "version": "1.1", 
-    "fullName": "fn_facebook_integrated", 
+    "fullName": "FN facebook webpages integrated", 
     "id": "facebook@federatednetworks.com", 
     "description": "Facebook webpages integrated by FN",
 	"permissions": {"private-browsing": true}
