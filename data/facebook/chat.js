@@ -105,8 +105,9 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		{
 		  var input$ =get_inputbox_in_facebookchatTag(afacebookchatTag);
 		  input$.val(amsg);
-		  triggerkeypress_enter(input$[0]);
-		  //jquery_triggerkeypress_enter(input$);
+		  //can not send out !!!!!!!
+		  //triggerkeypress_enter(input$[0]);
+		 jquery_triggerkeypress_enter(input$);
 		}
 		catch(err)
 		{
@@ -269,7 +270,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 				{
 					//addReadersToDoc is in another js
 					WEB_CMM.log("calling addReadersToDoc :g_APP_NAME=" + g_APP_NAME +" ,Rcipients=" + Rcipients + " ,msg="+msg ); 
-					addReadersToDoc(g_APP_NAME, Rcipients, msg, callback_for_invitation);
+					//addReadersToDoc(g_APP_NAME, Rcipients, msg, callback_for_invitation);
 					msg = g_facebookchat_fndocid_prefix + msg;
 					sendmsg_in_facebookchatTag(evt.data.facebookchattag, msg);
 					clean_fntag_inputmessage(evt.data.fnchattag);
@@ -437,7 +438,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	{	
 		try
 		{
-		//WEB_CMM.log(" call get_facebook_chat_conversation_data: " + chatTag );
+		WEB_CMM.log(" call get_facebook_chat_conversation_data: " + chatTag );
 		var afacebook_chat_conversation_obj =  new facebook_chat_conversation_class();
 		var fbChatConvItem$ = $(chatTag).find(".conversation").children(".fbChatConvItem");
 		//WEB_CMM.log(" in  get_facebook_chat_conversation_data: fbChatConvItems len: " + fbChatConvItem$.length );
@@ -550,9 +551,66 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 			fbNubFlyoutBody$.on("DOMNodeInserted",  { facebookchattag: chatTag}, listener_for_facebook_chat_changing);
 		}
 	}
+	function remove_listener_for_facebook_chat_changing(chatTag)
+	{//DOMAttrModified ? or DOMNodeInserted ? or other event
+		var fbNubFlyoutBody$ = $(chatTag).find(".fbNubFlyoutBody");
+		if(fbNubFlyoutBody$.length > 0)
+		{
+			fbNubFlyoutBody$.off("DOMNodeInserted",  { facebookchattag: chatTag}, listener_for_facebook_chat_changing);
+			WEB_CMM.log("on_fn_toggle_option_changed is removed from the listner of fbNubFlyoutBody DOMNodeInserted " );
+		}
+	}
+	
+	function clean_fn_chatTag(input, chatTag)
+	{// : if user remove the CIA mode , clean the created fnchattag
+		remove_clean_fn_chatTag_listener(input, chatTag);
+		remove_listener_for_facebook_chat_changing(chatTag);
+		var afnchatTag$ = get_fnchatTag_in_facebookchatTag(chatTag);
+		if(afnchatTag$ && afnchatTag$.length>0)
+		{
+			afnchatTag$.remove();
+			WEB_CMM.log("clean_fn_chatTag:  afnchatTag is removed" );
+		}
+	}
+	
+	function on_fn_toggle_option_changed(evt)
+	{
+		var target  =  evt.target;
+	    if(target)
+		{
+			var attr =  $(target).attr("fn-toggle-option");
+			if(attr != "FNTRE")
+			{
+		 		var afacebookchattag  =  evt.data.facebookchattag;
+				if( afacebookchattag )
+				{
+					setTimeout(clean_fn_chatTag, 1, target, afacebookchattag);
+				}
+			}
+		}
+	}
+	
+	function add_clean_fn_chatTag_listener(input, chatTag)
+	{//input will have "fn-toggle-option" attribute, if it is not  "FNTRE", then clean_fn_chatTag 
+		if(input)
+		{
+			$(input).on("DOMAttrModified",  { facebookchattag: chatTag}, on_fn_toggle_option_changed);
+		}
+	}
+	
+	function remove_clean_fn_chatTag_listener(input, chatTag)
+	{//input will have "fn-toggle-option" attribute, if it is not  "FNTRE", then clean_fn_chatTag 
+		if(input)
+		{
+			$(input).off("DOMAttrModified",  { facebookchattag: chatTag}, on_fn_toggle_option_changed);
+			
+			WEB_CMM.log("on_fn_toggle_option_changed is removed from the listner of input DOMAttrModified " );
+		}
+	}
 	
 	function create_fn_chatTag(input, chatTag)
-	{//to do : if user remove the CIA mode , clean the created fnchattag
+	{
+		add_clean_fn_chatTag_listener(input, chatTag);
 		var afnchatTag$ = get_fnchatTag_in_facebookchatTag(chatTag);
 		if(!afnchatTag$ || !afnchatTag$.length)
 		{
