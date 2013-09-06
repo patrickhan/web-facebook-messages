@@ -104,10 +104,13 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		try
 		{
 		  var input$ =get_inputbox_in_facebookchatTag(afacebookchatTag);
-		  input$.val(amsg);
-		  //can not send out !!!!!!!
-		  //triggerkeypress_enter(input$[0]);
-		 jquery_triggerkeypress_enter(input$);
+		  if(input$ && input$.length > 0)
+		  {
+			input$.val(amsg);
+			//can not send out !!!!!!!
+			setTimeout(triggerkeypress_enter, 1, input$[0]);
+			//jquery_triggerkeypress_enter(input$);
+			}
 		}
 		catch(err)
 		{
@@ -136,6 +139,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	{
 		return fnchattag$.find(".RichTextEditorR");
 	}
+	
 	function get_input_in_fnchattag(fnchattag$)
 	{
 		//return fnchattag$.children(".RichTextEditorS") // this not work ?
@@ -216,14 +220,17 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 			{	                            
 				var the_A_Node = the_A_Node$[0];	
 				var target = facebookchattag;
-				
+				if(!target.m_fnrecipients)
+				{
+					target.m_fnrecipients = [];
+				}
 				//add listener for user adding new recipients
 				the_A_Node.addEventListener("DOMAttrModified", function(evt){
 					var tempANode = evt.target;
 					tempANode.m_fnEditObject.m_fnrecipients = [];
 					fillRecipientsTo_fnrecipients(tempANode,target);//tempANode is the_A_Node
 				}, false);
-				target.m_fnrecipients = [];	                           
+					                           
 				fillRecipientsTo_fnrecipients(the_A_Node, target);
 			}
 		}
@@ -264,13 +271,13 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 			{
 				// we do not set the recipients to FNRTE , instead we add the recipients to the FNDOCID
 				//set_fntag_recipients(evt.data.facebookchattag, evt.data.fnchattag);
-				var Rcipients = get_FacebookChat_Recipients(evt.data.facebookchattag);
+				var Recipients = get_FacebookChat_Recipients(evt.data.facebookchattag);
 				var msg  = get_fntag_inputmessage(evt.data.fnchattag);
 				if(msg)
 				{
 					//addReadersToDoc is in another js
-					WEB_CMM.log("calling addReadersToDoc :g_APP_NAME=" + g_APP_NAME +" ,Rcipients=" + Rcipients + " ,msg="+msg ); 
-					//addReadersToDoc(g_APP_NAME, Rcipients, msg, callback_for_invitation);
+					WEB_CMM.log("calling addReadersToDoc :g_APP_NAME=" + g_APP_NAME +" ,Recipients=" + Recipients + " ,msg="+msg ); 
+					addReadersToDoc(g_APP_NAME, Recipients, msg, callback_for_invitation);
 					msg = g_facebookchat_fndocid_prefix + msg;
 					sendmsg_in_facebookchatTag(evt.data.facebookchattag, msg);
 					clean_fntag_inputmessage(evt.data.fnchattag);
@@ -496,15 +503,122 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		
 		
 	}
+
+	/*
+	//fn_message_format example
+	 var data = {"imtype": "facebook", "msgheader":"passDataToRTE", "eleRteS" : "RichTextEditorR","message": {
+   data:[{ "imtype":"facebook",
+     "msgheader":"passDataToRTE",
+     "sender":"fntest001",
+     "receiver":["fntest002-name"],
+     "datetime":"4:06:38 PM",
+     "eleRte" : "RichTextEditorR",
+     "message":"fc77b3a0-5fbd-4b7b-8a37-27409deed84d"}],
+   args : "",
+   finish: function(ret) {
+    
+     
+   },
+  }};
+	*/
+	//class fn message format
+	function fn_message_format()
+	{
+		this.imtype = "facebook";
+		this.msgheader = "passDataToRTE";
+		this.eleRteS="";//should set later
+		this.message = new fn_message_content_format();
+	}
+	//class fn message content format
+	function fn_message_content_format()
+	{
+		this.data = []; //aray of fn_message_content_data_format , 
+		this.args = "";
+		this.finish = function(ret) {
+    	};
+		
+	}
+	//class fn message content data format
+	function fn_message_content_data_format()
+	{
+		this.imtype = "facebook";
+		this.msgheader = "passDataToRTE";
+		this.sender = ""; // should set later
+		this.receiver = [];//array of sting // should set later
+		//this.isHandShake = false; // face book chat has no isHandShake 
+		this.datetime = "";// empty means : do not show datetime
+		this.eleRte = ""; // should set later
+		this.message = "";// should set later
+	}
+	
+	// facebook_chat_conversation_class convert to fn_message_format
+	function facebook_chat_conversation_class_to_fn_message_format(afacebook_chat_conversation_class, afacebookchattag)
+	{
+	WEB_CMM.log(" IN  facebook_chat_conversation_class_to_fn_message_format  : "   + afacebook_chat_conversation_class.toStringf() );
+	
+	
+		if(!afacebook_chat_conversation_class)
+		{
+		WEB_CMM.log("  facebook_chat_conversation_class_to_fn_message_format A : "  );
+			return null;
+		}
+		 
+		if(!afacebook_chat_conversation_class.conversation_items_)// array of facebook_chat_conversation_item_class
+		{
+		WEB_CMM.log("  facebook_chat_conversation_class_to_fn_message_format B: "  );
+			return null;
+		}
+		if(afacebook_chat_conversation_class.conversation_items_.length== 0 )
+		{
+		WEB_CMM.log("  facebook_chat_conversation_class_to_fn_message_format C : "  );
+			return null;
+		}
+		var afn_message_format = new fn_message_format();
+		var Rcipients = get_FacebookChat_Recipients( afacebookchattag);
+		var afnchatTag$ = get_fnchatTag_in_facebookchatTag(afacebookchattag);
+		var fn_rte_Reader$ = get_reader_in_fnchattag(afnchatTag$);
+		var fn_rte_Reader_ID = fn_rte_Reader$.attr('id');
+		
+		var fn_rte_Sender$ =  get_input_in_fnchattag(afnchatTag$);
+				 
+		var fn_rte_Sender_ID = fn_rte_Sender$.attr('id');
+		
+				
+		for(var i = 0; i < afacebook_chat_conversation_class.conversation_items_.length; i++)
+		{
+		 
+			var item  =  afacebook_chat_conversation_class.conversation_items_[i];
+			if(item && item.messages_  &&  item.messages_.length > 0)
+			{
+			 
+				for(var j = 0; j < item.messages_.length; j++)
+				{
+				 
+					var amessage = item.messages_[j];
+					var afn_message_content_data_format =  new fn_message_content_data_format();
+					afn_message_content_data_format.sender = item.sender_;
+					afn_message_content_data_format.receiver = Rcipients;
+					afn_message_content_data_format.eleRte = fn_rte_Reader_ID;
+					afn_message_content_data_format.message = amessage.replace( g_facebookchat_fndocid_prefix,'');// remove the g_facebookchat_fndocid_prefix
+					
+					afn_message_format.eleRteS=fn_rte_Sender_ID;
+					afn_message_format.message.data.push(afn_message_content_data_format);
+				}
+			}
+		}
+		return afn_message_format;
+	}
+	
+	 
 	
 	function handle_conversation_content(chatTag, afacebook_chat_conversation_obj )
 	{
 		if(!chatTag.conversation_obj)
 		{
 			chatTag.conversation_obj = afacebook_chat_conversation_obj;
-			//todo ... call sth to show afacebook_chat_conversation_obj
+			 
 			 WEB_CMM.log("   please show these : " + afacebook_chat_conversation_obj.toStringf());
-			//var afnchatTag$ = get_fnchatTag_in_facebookchatTag(chatTag); 
+			sendout_conversation_content(chatTag, afacebook_chat_conversation_obj)
 		}
 		else
 		{
@@ -513,18 +627,22 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 			{
 				chatTag.conversation_obj = afacebook_chat_conversation_obj;
 				WEB_CMM.log("   please show these : " + diff.toStringf());
-				//var afnchatTag$ = get_fnchatTag_in_facebookchatTag(chatTag);
-				//var afnchatTag$ = get_fnchatTag_in_facebookchatTag(chatTag);
-				//var fn_rte_Reader$ = get_reader_in_fnchattag(afnchatTag$);
-				//var fn_rte_Reader_ID = fn_rte_Reader$.attr('id');
-				 
+				sendout_conversation_content(chatTag, diff);	 
 			}
 		}
 	}
 	
+	function sendout_conversation_content(chatTag, afacebook_chat_conversation_obj)
+	{
+		var fn_message_format = facebook_chat_conversation_class_to_fn_message_format(afacebook_chat_conversation_obj, chatTag);
+		//to do using fn_message_format
+		
+		WEB_CMM.log(" sendout_conversation_content  is : " + JSON.stringify(fn_message_format) );
+	}
+	
 	
 	function listener_for_facebook_chat_changing(evt)
-	{//todo
+	{ 
 	
 		WEB_CMM.log(" in listener_for_facebook_chat_changing: " + evt.data.facebookchattag );
 		var target  =  evt.data.facebookchattag
@@ -556,19 +674,23 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		var fbNubFlyoutBody$ = $(chatTag).find(".fbNubFlyoutBody");
 		if(fbNubFlyoutBody$.length > 0)
 		{
-			fbNubFlyoutBody$.off("DOMNodeInserted",  { facebookchattag: chatTag}, listener_for_facebook_chat_changing);
+			fbNubFlyoutBody$.off("DOMNodeInserted", listener_for_facebook_chat_changing);
 			WEB_CMM.log("on_fn_toggle_option_changed is removed from the listner of fbNubFlyoutBody DOMNodeInserted " );
 		}
 	}
 	
 	function clean_fn_chatTag(input, chatTag)
 	{// : if user remove the CIA mode , clean the created fnchattag
-		remove_clean_fn_chatTag_listener(input, chatTag);
-		remove_listener_for_facebook_chat_changing(chatTag);
 		var afnchatTag$ = get_fnchatTag_in_facebookchatTag(chatTag);
 		if(afnchatTag$ && afnchatTag$.length>0)
 		{
 			afnchatTag$.remove();
+			remove_clean_fn_chatTag_listener(input, chatTag);
+			remove_listener_for_facebook_chat_changing(chatTag);
+			if(chatTag.conversation_obj)
+			{
+				delete chatTag.conversation_obj;
+			}
 			WEB_CMM.log("clean_fn_chatTag:  afnchatTag is removed" );
 		}
 	}
@@ -579,8 +701,9 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	    if(target)
 		{
 			var attr =  $(target).attr("fn-toggle-option");
-			if(attr != "FNTRE")
+			if(attr != "FNRTE")
 			{
+			WEB_CMM.log("on_fn_toggle_option_changed:  fn-toggle-option is : "  + attr);
 		 		var afacebookchattag  =  evt.data.facebookchattag;
 				if( afacebookchattag )
 				{
@@ -602,7 +725,8 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	{//input will have "fn-toggle-option" attribute, if it is not  "FNTRE", then clean_fn_chatTag 
 		if(input)
 		{
-			$(input).off("DOMAttrModified",  { facebookchattag: chatTag}, on_fn_toggle_option_changed);
+			$(input).off("DOMAttrModified",   on_fn_toggle_option_changed);
+			
 			
 			WEB_CMM.log("on_fn_toggle_option_changed is removed from the listner of input DOMAttrModified " );
 		}
@@ -624,8 +748,14 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 				
 				//add a id to fnrte reader object
 				var fn_rte_Reader$ = get_reader_in_fnchattag(afnchatTag$);
-				var uniqID = WEB_CMM.uniqID(8);
-				fn_rte_Reader$.attr('id',uniqID);
+				 
+				var uniqID_reader = WEB_CMM.uniqID(20);
+				 
+				fn_rte_Reader$.attr('id',uniqID_reader);
+				
+				var fn_rte_Sender$ =  get_input_in_fnchattag(afnchatTag$);
+				var uniqID_sender = WEB_CMM.uniqID(20);
+				fn_rte_Sender$.attr('id',uniqID_sender);
 				
 			}
 		}
@@ -702,16 +832,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 			  evt.stopPropagation();
 			  //by design : do toggle here
 			  setTimeout( toggle_FacebookChat, 0, evt.target, chatTag$.get(0), true); 
-			  
-			  /*editor.addEventListener("keydown", function(evt)
-			  {WEB_CMM.log(" keydown the event : " + evt);}, true);
-			  
-			  editor.addEventListener("keypress", function(evt)
-			  {WEB_CMM.log(" keypress the event : " + evt);}, true);
-			  
-			  editor.addEventListener("keyup", function(evt)
-			  {WEB_CMM.log(" keyup the event : " + evt);}, true);
-			  */
+
 		   }
 		}catch(e)
 		{

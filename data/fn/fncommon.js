@@ -15,7 +15,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
             idlength = Math.floor(Math.random() * charstoformid.length);
         }
         var uniqid = '';
-        for (var i = 0; i < length; i++) {
+        for (var i = 0; i < idlength; i++) {
             uniqid += charstoformid[Math.floor(Math.random() * charstoformid.length)];
         }
         return uniqid;
