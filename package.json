@@ -1,10 +1,27 @@
 {
-    "name": "fn_facebook_integrated", 
+    "name": "fn_webpages_integrated", 
     "license": "MPL 2.0", 
     "author": "Woody", 
     "version": "1.1", 
-    "fullName": "FN facebook webpages integrated", 
-    "id": "facebook@federatednetworks.com", 
-    "description": "Facebook webpages integrated by FN",
-	"permissions": {"private-browsing": true}
+    "fullName": "FN webpages integrated", 
+    "id": "webpages@federatednetworks.com", 
+    "description": "webpages integrated by FN",
+	"permissions": {"private-browsing": true},
+	"preferences": [
+		{
+	        "name": "fn-facebook-pages-enable",
+	        "title": "Enable the integrated features in facebook pages",
+	        "description": "Enable the integrated features in facebook pages",
+	        "type": "bool",
+	        "value": true
+	    },
+	    {
+	        "description": "enable gmail conversation features.",
+	        "title": "enable conversation features in gmail",
+	        "name": "fn-conversation-gmail-enable",
+	        "type": "bool",
+	        "value": true
+	        
+	    }
+    ]
 }

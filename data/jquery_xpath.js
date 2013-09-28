@@ -48,3 +48,22 @@ $(function() {
 })(jQuery);
 
 
+
+;(function($) {
+	$.expr[':'].contentIs = function(el, idx, meta) {
+		
+		var str = $(el).text();
+		/*var n=str.indexOf(meta[3]);
+		if(n !=-1)
+		{
+			fn_web_common_ns.log( "jQuery   contentIs :"+ $(el).text() + "\n meta[3] " +  meta[3]  );
+		}*/
+		
+	    return str === meta[3];
+	}
+})(jQuery);
+
+
+
+
+
