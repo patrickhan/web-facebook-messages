@@ -52,8 +52,10 @@ LRESULT FNIMToggleChatSessionFNMainWindowUI::OnDestroy(UINT /* uMsg */, WPARAM /
 
     if(theMainDOMWindow_)
     {
+        theMainDOMWindow_->Close();
         theMainDOMWindow_ = nsnull;
     }
+    //ansIWebBrowser_  is previous version variable , it does not work now
     if(ansIWebBrowser_ )
     {
          DestoryBrowser();
@@ -225,9 +227,6 @@ PRBool  FNIMToggleChatSessionFNMainWindowUI:: Show( )
     }
 
     ShowWindow(SW_SHOW);
-    //::ShowWindow(theMainDOMWindow_HWND_, SW_SHOW);
-
-    
     ::ShowWindow(GetWindow(GW_CHILD),SW_SHOW );
     return PR_TRUE;
 }
@@ -263,14 +262,10 @@ extern std::string getIMUIFilePath();
 #include "nsISimpleEnumerator.h"
 BOOL  FNIMToggleChatSessionFNMainWindowUI::CreateBrowser()
 {
-    ::MessageBox(0, L"FNIMToggleChatSessionFNMainWindowUI::CreateBrowser(",L"",0);
     RECT rc ={0};
     ::GetWindowRect(m_hWnd,&rc);
     LONG w = rc.right- rc.left;
     LONG h = rc.bottom-rc.top ;
-    
-
-
 
     nsresult rv;
 
@@ -354,11 +349,11 @@ BOOL  FNIMToggleChatSessionFNMainWindowUI::CreateBrowser()
             if(::IsWindow(win))
             {
                 theMainDOMWindow_HWND_ = win;
-                ::ShowWindow(win, SW_HIDE);
-                //::SetParent(win, m_hWnd);
-                ::SetWindowLong(win, GWL_STYLE, (::GetWindowLong(win,GWL_STYLE) ) & ~(WS_THICKFRAME|WS_CAPTION));
+                ::ShowWindow(theMainDOMWindow_HWND_, SW_HIDE);
+                //::SetParent(theMainDOMWindow_HWND_, m_hWnd);
+                ::SetWindowLong(theMainDOMWindow_HWND_, GWL_STYLE, (::GetWindowLong(win,GWL_STYLE) ) & ~(WS_THICKFRAME|WS_CAPTION|WS_VISIBLE));
                 //::SetWindowLong(win, GWL_EXSTYLE, (::GetWindowLong(win,GWL_EXSTYLE)|WS_EX_TOOLWINDOW) & ~WS_EX_APPWINDOW);
-                ::MoveWindow(win,0, 0, w,h, FALSE);
+                ::MoveWindow(theMainDOMWindow_HWND_,-9999, -9999, w,h, FALSE);
                 if(topmost_DomWindow)
                 {
                     /*nsCOMPtr<nsIWindowMediator> windowMediator =  do_GetService("@mozilla.org/appshell/window-mediator;1", &rv);

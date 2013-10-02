@@ -36,7 +36,8 @@ END_COM_MAP()
 		bool shake_hand_smg_check (	IChatMessage * pMessage,	TChatMessageStatus Status );
 		void dispatch_Received_msg(	IChatMessage * pMessage,	TChatMessageStatus Status );
 
-    bool Chat2ForSeamSession( IChat* aIChat1 , IChat* aIChata2 );
+        bool Chat2ForSeamSession( IChat* aIChat1 , IChat* aIChata2 );
+        bool MessageCanSendout( IChatMessage * pMessage);
 		void firstTimeDumpMessages();
 
 

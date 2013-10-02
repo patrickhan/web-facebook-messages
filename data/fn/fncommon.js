@@ -1,6 +1,6 @@
 
 /*
- * define globle values for fn_web_common
+ * define globle values for fn_web_common and common functions
  */
 
 "use strict";
@@ -9,6 +9,9 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
 
 (function(ns)
 {
+	const HJContentIDRegEx = new RegExp('HJContentID:([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})', 'gm');        	    
+
+	const emailAddrRegEx = new RegExp('(\\w+\\.)*\\w+@(\\w+\\.)+[A-Za-z]+', 'gm');
     var charstoformid = '_0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'.split('');
     function uniqID(idlength) {
         if (! idlength) {
@@ -108,7 +111,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     function fill_recepients(editor, tobox)
     {
         //file the recepients
-        var emailAddrFinder = new RegExp('(\\w+\\.)*\\w+@(\\w+\\.)+[A-Za-z]+', 'gm');
+        var emailAddrFinder = emailAddrRegEx;
         var htmlString = tobox.innerHTML;
         if (tobox.tagName === "INPUT" || tobox.tagName === "TEXTAREA") {
             htmlString  = tobox.value;
@@ -206,6 +209,8 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
 
     //export
     //functions
+    ns.HJContentIDRegEx = HJContentIDRegEx;
+    ns.emailAddrRegEx = emailAddrRegEx;
     ns.nolog = false;
     ns.uniqID = uniqID;
     ns.log = log;

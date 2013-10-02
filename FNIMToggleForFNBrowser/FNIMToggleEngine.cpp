@@ -334,7 +334,6 @@ nsresult FNIMToggleEngine::handleApplciation( PRUint32 processID , IFNIMToggleAp
     nsCOMPtr<IFNIMToggleIMApplicationHandler> handler = new FNIMToggleIMApplicationHandler();
     handler->Init(processID, app) ;
     imAplicationhandlers_map_[processID] = handler;
-    ::MessageBox(0,L"FNIMToggleEngine::handleApplciation",L"",0);
     return NS_OK;
 }
 

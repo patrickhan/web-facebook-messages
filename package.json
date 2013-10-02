@@ -20,8 +20,29 @@
 	        "title": "enable conversation features in gmail",
 	        "name": "fn-conversation-gmail-enable",
 	        "type": "bool",
-	        "value": true
-	        
+	        "value": true    
+	    },
+	    {
+	        "description": "enable yahoo conversation features.",
+	        "title": "enable conversation features in yahoo",
+	        "name": "fn-conversation-yahoo-enable",
+	        "type": "bool",
+	        "value": true   
+	    },
+	    {
+	        "description": "enable outlook conversation features.",
+	        "title": "enable conversation features in outlook",
+	        "name": "fn-conversation-outlook-enable",
+	        "type": "bool",
+	        "value": true   
+	    },	  	    
+	    {
+	        "description": "enable twitter conversation features.",
+	        "title": "enable conversation features in twitter",
+	        "name": "fn-conversation-twitter-enable",
+	        "type": "bool",
+	        "value": true   
 	    }
+	    
     ]
 }

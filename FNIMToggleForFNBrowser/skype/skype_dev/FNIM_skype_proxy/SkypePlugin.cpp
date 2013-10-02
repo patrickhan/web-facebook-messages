@@ -6,6 +6,7 @@
 #include <xstring>
 #include <list>
 
+#include "atltime.h"
 
 SkypePlugin::SkypePlugin(): //m_cRef(0L),
 _Skype_EventListener_Cookie (0u),
@@ -18,6 +19,7 @@ connected_skype_(false)
 SkypePlugin::~SkypePlugin()
 {
     // Cleanup
+    CTime aTime;
     quit();
     CoUninitialize();
 }
@@ -144,6 +146,48 @@ void  SkypePlugin::unregister_IFNIMChat(DWORD cookie)
     }
 }
 
+bool SkypePlugin::MessageCanSendout( IChatMessage * pMessage)
+{
+    if(NULL == pMessage)
+    {
+        return false;
+    }
+
+    IChatPtr aIChat = pMessage->Chat;
+    if(!aIChat)
+    {
+        return false;
+    }
+    IUserCollectionPtr mc  =  aIChat->Members;
+    long count =  mc->Count;
+
+     _bstr_t fromSkypeHandle = pMessage->FromHandle;
+
+    // if there is a user is not online , then the message is sending , not been sent
+    if(count >= 2)
+    {
+        for(long i = 1L; i<= count ; i++ ) //skype is based on 1 
+        {
+            IUserPtr amember = mc->Item[i];
+            if( !amember )
+            {
+                continue;
+            }
+            _bstr_t ahandle1_bstr = amember->Handle;
+            if(fromSkypeHandle  == ahandle1_bstr)
+            {   
+                continue;
+            }
+            
+            if(amember->OnlineStatus == olsOffline)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 bool SkypePlugin::Chat2ForSeamSession( IChat* aIChat1 , IChat* aIChat2 )
 {
     bool isSeam =  false;
@@ -163,18 +207,19 @@ bool SkypePlugin::Chat2ForSeamSession( IChat* aIChat1 , IChat* aIChat2 )
         BSTR pname2 = name2.GetBSTR();
         if( 0 == wcsncmp(pname1, pname2, len1) )
         {
-            ::MessageBox(NULL, pname1,pname2, 0);
             return true;
         }
     }
+
     //condition2 group
     IChatMemberCollectionPtr mc1  =  aIChat1->MemberObjects;
     IChatMemberCollectionPtr mc2  =  aIChat2->MemberObjects;
-    if(mc1 && mc2)
+    long count1 =  mc1->Count;
+    long count2 =  mc2->Count;
+
+    if(mc1 && mc2 && count1 > 2  && count2 > 2)
     {
         bool seam = true;
-        long count1 =  mc1->Count;
-        long count2 =  mc2->Count;
         if(count2  != count1 )
         {
             seam = false;
@@ -220,6 +265,59 @@ bool SkypePlugin::Chat2ForSeamSession( IChat* aIChat1 , IChat* aIChat2 )
 
 }
 
+
+BOOL timeConvert(DATE time_stamp, __time32_t &out__time32_t)
+{
+    SYSTEMTIME asystemTime ={0};
+    BOOL ok =  VariantTimeToSystemTime(time_stamp,  &asystemTime);
+    if(!ok)
+    {
+        return FALSE;
+    }
+    //COleDateTime is in local timezone, DateTime is in UTC, so we need to convert
+    SYSTEMTIME st_utc;
+    TzSpecificLocalTimeToSystemTime(NULL, &asystemTime, &st_utc);
+    /*
+    The range of the _mkgmtime32 function is from midnight, January 1, 1970, UTC to January 19, 3:14:07, 2038, UTC. 
+    The range of _mkgmtime64 is from midnight, January 1, 1970, UTC to 23:59:59, December 31, 3000, UTC. 
+    An out-of-range date results in a return value of –1. The range of _mkgmtime depends on whether _USE_32BIT_TIME_T is defined. 
+    If not defined (the default) the range is that of _mkgmtime64; otherwise, the range is limited to the 32-bit range of _mkgmtime32.
+    */
+    tm aTM = {0};
+    aTM.tm_year = (int)st_utc.wYear - 1900;
+    aTM.tm_mon = (int)st_utc.wMonth;
+    aTM.tm_mday = st_utc.wDay;
+    aTM.tm_hour = st_utc.wHour;
+    aTM.tm_min = st_utc.wMinute;
+    aTM.tm_sec = st_utc.wSecond;
+    out__time32_t = _mkgmtime32(&aTM);
+    return TRUE;
+}
+
+//give a DATE time_stamp, calculate the timespan from Now
+int timeSpanFromNow(DATE time_stamp)
+{
+    __time64_t now ={0};
+    _time64(  &now );
+    CTime tmp(now);
+
+    SYSTEMTIME st;
+    tmp.GetAsSystemTime(st); 
+
+    double nowtime_stamp;
+    AtlConvertSystemTimeToVariantTime(st, &nowtime_stamp);
+    //ConvertSystemTimeToVariantTime(st) 
+
+    __time32_t now_new;
+    timeConvert( nowtime_stamp, now_new);
+
+
+    __time32_t then;
+    timeConvert( time_stamp, then);
+
+    return  (int)(now_new - then);
+}
+
 void  SkypePlugin::dispatch_Received_msg(IChatMessage * pMessage,	TChatMessageStatus Status)
 {//TChatMessageStatus::cmsRead
     if(pMessage ==  NULL)
@@ -228,41 +326,29 @@ void  SkypePlugin::dispatch_Received_msg(IChatMessage * pMessage,	TChatMessageSt
     //to take this into account , we change the condition of Status
 
     bool status_passed =  false;
-#if 0
-    IChatMessageCollectionPtr theMessages = aIChatPtr->Messages;
-    if(theMessages)
-    {
-        long count =  theMessages->Count ;
-        for(long i = 1 ; i <= count; i++)
-        {
-
-            IChatMessagePtr aIChatMessagePtr = theMessages->GetItem( i);
-            _bstr_t guid2 = aIChatMessagePtr->Guid;
-            if(guid2 == guid1) 
-            {
-                continue; // ignor this handshake message
-
-            }
-            dispatch_Received_msg(aIChatMessagePtr, SKYPE4COMLib::cmsReceived);//
-
-        }
-    }
-
-#else
-    
+ 
 
     if(Status==SKYPE4COMLib::cmsReceived )
-    {::MessageBox(NULL, L"Status==SKYPE4COMLib::cmsReceived  ", L"", 0);
+    {
         status_passed  =  true;
     }
     if(Status==SKYPE4COMLib::cmsSent)
-    {::MessageBox(NULL, L"Status==SKYPE4COMLib::cmsSent  ", L"", 0);
-        status_passed  =  true;
+    {
+        int span  = timeSpanFromNow(pMessage->Timestamp);
+        if(span >  10)
+        {// the message has shown due to sendings
+            //so , do not pass it to FNRTE
+            status_passed  =  false;
+        }
+        else
+        {
+            status_passed  =  true;
+        }
     }
 
     _bstr_t FromHandle_bstr = pMessage->FromHandle;
 
-#if 1 // let do it later
+
     if(Status==SKYPE4COMLib::cmsSending)
     {
 
@@ -271,72 +357,25 @@ void  SkypePlugin::dispatch_Received_msg(IChatMessage * pMessage,	TChatMessageSt
 
         _variant_t v(count) ;// we use _bstr_t(_variant_t) constructor to create _bstr_t instance
         _bstr_t date_str(v );
-        ::MessageBox(NULL, L"pMessage->Chat->ActiveMembers->Count  ", date_str.GetBSTR(), 0);
 
         if(count == 1)
         {
-            ::MessageBox(NULL, L"pMessage->Chat->ActiveMembers->Count == 1", L"", 0);
             status_passed  =  true;
         }
         else if(count >  1)
         {
-        ::MessageBox(NULL, L"pMessage->Chat->ActiveMembers->Count > 1", L"", 0);
+            bool cansent = MessageCanSendout(pMessage);
+            if(!cansent)
+            {
+                status_passed  =  true;
+            }
+            else
+            {
+                status_passed  =  false;
+            }
         }
-        //for( long i = 1;  i  <= count ;i++)
-        //{
-
-        //    SKYPE4COMLib::IUserPtr a_user =  pMessage->Users->Item[i];
-        //    if(!a_user)
-        //    {
-        //        continue;
-        //    }
-
-        //    _bstr_t a_userHandle_bstr = a_user->Handle;
-        //    if(a_userHandle_bstr == FromHandle_bstr)
-        //    {
-        //        continue;
-        //    }
-
-        //    TOnlineStatus aTOnlineStatus = a_user->OnlineStatus ;
-        //    if(aTOnlineStatus == olsOffline ||
-        //        aTOnlineStatus == olsSkypeOut ||
-        //        aTOnlineStatus == olsUnknown )
-        //    {
-        //        status_passed  =  true;
-        //    }
-        //    else if (aTOnlineStatus == olsDoNotDisturb)
-        //    {
-
-        //    }
-        //    else if(aTOnlineStatus == olsNotAvailable)
-        //    {
-
-        //    }
-
-        //    else if(aTOnlineStatus == olsSkypeMe)
-        //    {
-
-        //    }
-        //    else
-        //    {
-
-        //    }
-
-
-        //    //olsUnknown = -1,
-        //    // olsOffline = 0,
-        //    // olsOnline = 1,
-        //    // olsAway = 2,
-        //    // olsNotAvailable = 3,
-        //    // olsDoNotDisturb = 4,
-        //    // olsSkypeOut = 5,
-        //    // olsSkypeMe = 6
-
-        //}
     }
-#endif // #if 1
 
-#endif  //#if 0
     if(status_passed  )
     {
         IChatPtr aIChatPtr = pMessage->GetChat();
@@ -366,26 +405,9 @@ void  SkypePlugin::dispatch_Received_msg(IChatMessage * pMessage,	TChatMessageSt
                 }
                 if (Chat2ForSeamSession(msgChat,aIChat ) )
                 {
-                    SYSTEMTIME asystemTime ={0};
-                    BOOL ok =  VariantTimeToSystemTime(time_stamp,  &asystemTime);
-                    //COleDateTime is in local timezone, DateTime is in UTC, so we need to convert
-                    SYSTEMTIME st_utc;
-                    TzSpecificLocalTimeToSystemTime(NULL, &asystemTime, &st_utc);
-                    /*
-                    The range of the _mkgmtime32 function is from midnight, January 1, 1970, UTC to January 19, 3:14:07, 2038, UTC. 
-                    The range of _mkgmtime64 is from midnight, January 1, 1970, UTC to 23:59:59, December 31, 3000, UTC. 
-                    An out-of-range date results in a return value of –1. The range of _mkgmtime depends on whether _USE_32BIT_TIME_T is defined. 
-                    If not defined (the default) the range is that of _mkgmtime64; otherwise, the range is limited to the 32-bit range of _mkgmtime32.
-                    */
-                    tm aTM = {0};
-                    aTM.tm_year = (int)st_utc.wYear - 1900;
-                    aTM.tm_mon = (int)st_utc.wMonth;
-                    aTM.tm_mday = st_utc.wDay;
-                    aTM.tm_hour = st_utc.wHour;
-                    aTM.tm_min = st_utc.wMinute;
-                    aTM.tm_sec = st_utc.wSecond;
-                    __time32_t   aTime_t = _mkgmtime32(&aTM);
 
+                    __time32_t   aTime_t ;
+                    timeConvert( time_stamp, aTime_t);
                     _variant_t v(aTime_t) ;// we use _bstr_t(_variant_t) constructor to create _bstr_t instance
                     _bstr_t date_str(v );
                     date_str += _bstr_t(L"000");// we do not care about ms
@@ -436,26 +458,6 @@ bool  SkypePlugin::shake_hand_smg_check(IChatMessage * pMessage,	TChatMessageSta
                         aSkypeAPI_IFNIMChat->set_Skype_chat_obj(pIChat );
                         aSkypeAPI_IFNIMChat->set_handshaked2(FromSkypeHandle.GetBSTR(),  true);
 
-                        //dispatch messages in the hisorty shown in the chat
-
-                        IChatMessageCollectionPtr theMessages = aIChatPtr->Messages;
-                        if(theMessages)
-                        {
-                            long count =  theMessages->Count ;
-                            for(long i = 1 ; i <= count; i++)
-                            {
-
-                                IChatMessagePtr aIChatMessagePtr = theMessages->GetItem( i);
-                                _bstr_t guid2 = aIChatMessagePtr->Guid;
-                                if(guid2 == guid1) 
-                                {
-                                    continue; // ignor this handshake message
-
-                                }
-                                dispatch_Received_msg(aIChatMessagePtr, SKYPE4COMLib::cmsReceived);//
-
-                            }
-                        }
 
                     }
 

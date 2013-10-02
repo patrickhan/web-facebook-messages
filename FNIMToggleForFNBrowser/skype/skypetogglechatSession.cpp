@@ -1355,7 +1355,7 @@ void SkypeToggleChatSession::FirstTimeDumpMessages()
 
                    nsString timeStr;
                    doubleTime2UniversalTimeString(aDATE, timeStr);
-
+                   Sleep(100);
                    on_chat_message_received(from.GetBSTR(), megBody.GetBSTR(), timeStr.get() );
                }
             }
