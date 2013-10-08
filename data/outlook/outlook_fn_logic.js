@@ -67,6 +67,12 @@ function handle_outlook_composer(acomposer)
 	{
 		//todo : store it into document.body or elsewhere
 	}
+	var subject = PAGE_PARSER.getSubject(acomposer);
+	if(!subject)
+	{
+		//todo : store it into document or elsewhere
+	}
+	
 	
 	if(!acomposer.handled_in_fn_conversation)
 	{
@@ -97,15 +103,6 @@ function hookSendButton(acomposer)
 ///////////////reply token part[
 
 //to be able to get the last email content, we must click the reply_token element()
-
-
-
-/*function check_for_reply(acomposer)
-{
-	WEB_CMM.log( "check_for_reply :  + "  +  acomposer );
-	var ret = PAGE_PARSER.find_reply_token(acomposer);
-	return !!ret;
-}*/
 
 ///reply token part]
 

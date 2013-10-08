@@ -47,11 +47,16 @@ function handle_yahoo_composer(acomposer)
 	}
 	WEB_CMM.log( "handle_yahoo_composer :  " +  acomposer );
 	
-
-	var reply_token = PAGE_PARSER.find_reply_token(acomposer);//check_for_reply(acomposer)
-	if(!reply_token)
+	var forReply = isForReply(acomposer);
+	if(!forReply)
 	{
 		return;
+	}
+	WEB_CMM.log( "handle_yahoo_composer : it is for reply  "  );
+	var reply_token = PAGE_PARSER.find_reply_token(acomposer); 
+	if(reply_token)
+	{//to be able to get the last email content, we must click the reply_token element()
+		PAGE_PARSER.expand_show_trimmed_content(reply_token);
 	}
 	
 	var hooked  = hookSendButton(acomposer)
@@ -59,14 +64,20 @@ function handle_yahoo_composer(acomposer)
 	{
 		return;
 	}
-	PAGE_PARSER.expand_show_trimmed_content(reply_token);
-	var latest_HJContentID = PAGE_PARSER.get_latest_HJContentID(acomposer);
-	
-	if(latest_HJContentID)
+	//setTimeout( function(){
+		var latest_HJContentID = PAGE_PARSER.get_latest_HJContentID(acomposer);
+		
+		if(latest_HJContentID)
+		{
+			//todo : store it into document.body or elsewhere
+		}
+	//},500);
+	var subject = PAGE_PARSER.getSubject(acomposer);
+	if(!subject)
 	{
-		//todo : store it into document.body or elsewhere
+		//todo : store it into document or elsewhere
 	}
-	
+			
 	if(!acomposer.handled_in_fn_conversation)
 	{
 		acomposer.handled_in_fn_conversation = true;
@@ -99,12 +110,16 @@ function hookSendButton(acomposer)
 
 
 
-/*function check_for_reply(acomposer)
-{
-	WEB_CMM.log( "check_for_reply :  + "  +  acomposer );
-	var ret = PAGE_PARSER.find_reply_token(acomposer);
-	return !!ret;
-}*/
+function isForReply(acomposer)
+{// check the to box is filled or not, if it is filled then it is  for reply
+	var toBoxIsFilled = PAGE_PARSER.toBoxIsFilled(acomposer);
+	if(toBoxIsFilled )
+	{
+		return true;
+	}
+	
+	return false;
+}
 
 ///reply token part]
 
@@ -119,7 +134,13 @@ function searchElementPresent_findyahoo_composer()
 	var acomposer$  =  PAGE_PARSER.findyahoo_composer();
 	if(acomposer$ && acomposer$.length > 0)
 	{
-		handle_yahoo_composer(acomposer$[0]);
+		if(acomposer$ && acomposer$.length > 0)
+		{
+			acomposer$.each(function( index ){
+				handle_yahoo_composer(this);//this is the element of the index
+			});
+			
+		}
 	}
 	
 	window.setTimeout( searchElementPresent_findyahoo_composer, 200);
