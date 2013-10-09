@@ -26,8 +26,8 @@ const selector_gmail_composer_tobox_from_form = "form table textarea[name='to']"
 
 const selector_gmail_composer_subjectbox_from_form = "form  input[name='subject']"; 
 
-const selector_gmail_composer_tobox_emial_spans = "span[email*='@']:visible";  //
-const gmail_reply_prefix = "Re: "
+const selector_gmail_composer_tobox_emial_spans = "span[email*='@']:visible";  
+const gmail_reply_prefix = "Re: ";
 
 function get_latest_HJContentID(acomposer)
 {

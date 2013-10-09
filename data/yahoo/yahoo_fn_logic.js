@@ -65,17 +65,24 @@ function handle_yahoo_composer(acomposer)
 		return;
 	}
 	//setTimeout( function(){
-		var latest_HJContentID = PAGE_PARSER.get_latest_HJContentID(acomposer);
-		
-		if(latest_HJContentID)
-		{
-			//todo : store it into document.body or elsewhere
-		}
+	var latest_HJContentID = PAGE_PARSER.get_latest_HJContentID(acomposer);
+	
+	if(latest_HJContentID)
+	{
+		//todo : store it into document.body or elsewhere
+	}
 	//},500);
 	var subject = PAGE_PARSER.getSubject(acomposer);
-	if(!subject)
+	if(subject)
 	{
 		//todo : store it into document or elsewhere
+		WEB_CMM.log( "try  : find_tobox "  );
+		tobox$ = PAGE_PARSER.find_tobox(acomposer);
+		if(tobox$ && tobox$.length > 0)
+		{
+			WEB_CMM.log( "try  : save_Stream_topic "  );
+			fn_web_conversation_common_ns.save_Stream_topic(self, subject, tobox$[0]);
+		}
 	}
 			
 	if(!acomposer.handled_in_fn_conversation)

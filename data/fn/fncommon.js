@@ -240,3 +240,40 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     ns.ROLE_NAME_SEND_BY_MOUSE_CLICK = "mouse_click";
     
 })(fn_web_common_ns);
+
+//fn_web_conversation_common_ns has some common functions for fn web conversation logic
+var fn_web_conversation_common_ns  = (undefined === fn_web_conversation_common_ns) ? {}: fn_web_conversation_common_ns;
+(function(ns)
+{
+	const c_save_Stream_topic_msg = "save-Stream-topic";
+	function Struct_conversation_tobox_obj_define()
+	{
+		this.attrName="";
+		this.attrVal="";
+	}
+	
+	function create_Struct_conversation_tobox_obj_define()
+	{
+		var obj =  new Struct_conversation_tobox_obj_define();
+		obj.attrName = fn_web_common_ns.uniqID(10);
+		obj.attrVal  = fn_web_common_ns.uniqID(10);
+		return obj;
+	}
+	
+	
+	function save_Stream_topic(aworker, topic, tobox)//tobox is html Element
+	{
+		var aconversation_tobox_obj = create_Struct_conversation_tobox_obj_define();
+		$(tobox).attr(aconversation_tobox_obj.attrName, aconversation_tobox_obj.attrVal);
+		var ajson_str = JSON.stringify({"topic":topic,"tobox":aconversation_tobox_obj});
+		aworker.port.emit(c_save_Stream_topic_msg, ajson_str, tobox);
+	}
+	
+    //export
+    //functions
+    ns.save_Stream_topic = save_Stream_topic;
+    ns.conversation_tobox_obj_define = conversation_tobox_obj_define;
+    ns.create_Struct_conversation_tobox_obj_define = create_Struct_conversation_tobox_obj_define;
+
+    
+})(fn_web_conversation_common_ns);

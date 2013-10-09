@@ -186,6 +186,7 @@ function getSubject(acomposer)
 	ns.get_latest_HJContentID = get_latest_HJContentID;
 	ns.expand_show_trimmed_content = expand_show_trimmed_content;
 	ns.getSubject = getSubject;
+	ns.find_tobox = find_tobox;
 
 })(fn_webpage_parser_yahoo_ns);
 

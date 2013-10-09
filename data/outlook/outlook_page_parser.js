@@ -142,7 +142,7 @@ function getSubject(acomposer)
 	//remove 'Re:' if it has it.
 	if(subject.indexOf(reply_token_in_subject) == 0)
 	{
-		subject.substring(reply_token_in_subject.length -1);
+		subject = subject.substring(reply_token_in_subject.length -1);
 	}	
 	
 	WEB_CMM.log( "outlook getSubject :  subject is:" +  subject  );
