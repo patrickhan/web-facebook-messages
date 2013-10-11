@@ -42,6 +42,13 @@
 	        "name": "fn-conversation-twitter-enable",
 	        "type": "bool",
 	        "value": true   
+	    },
+	    {
+	        "name": "fn-toggle-options-persist",
+	        "title": "persist the fn toggle options to an editable element",
+	        "description": "persist the fn toggle options to an editable element",
+	        "type": "bool",
+	        "value": true
 	    }
 	    
     ]

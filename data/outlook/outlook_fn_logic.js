@@ -68,7 +68,7 @@ function handle_outlook_composer(acomposer)
 		//todo : store it into document.body or elsewhere
 	}
 	var subject = PAGE_PARSER.getSubject(acomposer);
-	if(!subject)
+	if(subject)
 	{
 		//todo : store it into document or elsewhere
 	}
@@ -121,27 +121,6 @@ function searchElementPresent_findoutlook_composer()
 	}
 	
 	window.setTimeout( searchElementPresent_findoutlook_composer, 200);
-}
-
-function findoutlook_composer()
-{
-	try
-	{
-		var outlook_composer$ = $(selector_outlook_composer);
-		if(!outlook_composer$ || outlook_composer$.length == 0)
-		{
-			WEB_CMM.log( "findoutlook_composer :  not found"   );
-			return false;
-		}
-		WEB_CMM.log( "findoutlook_composer :  found"   );
-		return outlook_composer$;
-	}
-	catch(err)
-	{
-		WEB_CMM.log( "findoutlook_composer :  excpetion " +  err  );
-	}
-	return null;
-	
 }
 ///outlook composer part
 

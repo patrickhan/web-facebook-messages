@@ -153,26 +153,6 @@ function searchElementPresent_findyahoo_composer()
 	window.setTimeout( searchElementPresent_findyahoo_composer, 200);
 }
 
-function findyahoo_composer()
-{
-	try
-	{
-		var yahoo_composer$ = $(selector_yahoo_composer);
-		if(!yahoo_composer$ || yahoo_composer$.length == 0)
-		{
-			WEB_CMM.log( "findyahoo_composer :  not found"   );
-			return false;
-		}
-		WEB_CMM.log( "findyahoo_composer :  found"   );
-		return yahoo_composer$;
-	}
-	catch(err)
-	{
-		WEB_CMM.log( "findyahoo_composer :  excpetion " +  err  );
-	}
-	return null;
-	
-}
 ///yahoo composer part
 
 function run_yahoo_fn()

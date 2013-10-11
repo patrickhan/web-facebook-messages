@@ -242,7 +242,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
 })(fn_web_common_ns);
 
 //fn_web_conversation_common_ns has some common functions for fn web conversation logic
-var fn_web_conversation_common_ns  = (undefined === fn_web_conversation_common_ns) ? {}: fn_web_conversation_common_ns;
+/*var fn_web_conversation_common_ns  = (undefined === fn_web_conversation_common_ns) ? {}: fn_web_conversation_common_ns;
 (function(ns)
 {
 	const c_save_Stream_topic_msg = "save-Stream-topic";
@@ -274,6 +274,7 @@ var fn_web_conversation_common_ns  = (undefined === fn_web_conversation_common_n
     ns.save_Stream_topic = save_Stream_topic;
     ns.conversation_tobox_obj_define = conversation_tobox_obj_define;
     ns.create_Struct_conversation_tobox_obj_define = create_Struct_conversation_tobox_obj_define;
+    
 
     
-})(fn_web_conversation_common_ns);
+})(fn_web_conversation_common_ns);*/

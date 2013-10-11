@@ -147,10 +147,10 @@ function findyahoo_composer()
 		var yahoo_composer$ = $(selector_yahoo_composer);
 		if(!yahoo_composer$ || yahoo_composer$.length == 0)
 		{
-			WEB_CMM.log( "findyahoo_composer :  not found"   );
+			//WEB_CMM.log( "findyahoo_composer :  not found"   );
 			return false;
 		}
-		WEB_CMM.log( "findyahoo_composer :  found "  +  yahoo_composer$.length);
+		//WEB_CMM.log( "findyahoo_composer :  found "  +  yahoo_composer$.length);
 		return yahoo_composer$;
 	}
 	catch(err)

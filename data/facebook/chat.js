@@ -32,6 +32,20 @@ var WEB_TEST = facebook_test_ns;//.create_test_panel =  create_test_panel;
 	    return null;
 	}
 	
+	function findFacebookChatTabElementFromFNRTESender(fnrte_sender)
+	{
+        if(!fnrte_sender)
+	    {
+	      return null;
+	    }
+		var chatTag$ =  $(fnrte_sender).closest("div[class='"+ g_facebook_chat_div_classname +"']");
+		if(chatTag$)
+		{
+			return chatTag$
+		}
+	    return null;
+	}
+	
 	function isFacebookChatInputbox( anInput )
 	{
         if(findFacebookChatTabElementFromInputbox ( anInput) )
@@ -103,14 +117,61 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		WEB_CMM.log(" sendmsg_in_facebookchatTag:   "  + amsg);
 		try
 		{
-		  var input$ =get_inputbox_in_facebookchatTag(afacebookchatTag);
-		  if(input$ && input$.length > 0)
-		  {
-			input$.val(amsg);
-			//can not send out !!!!!!!
-			setTimeout(triggerkeypress_enter, 1, input$[0]);
-			//jquery_triggerkeypress_enter(input$);
-			}
+			var afacebookchattag_ = afacebookchatTag;
+			var amsg_ = amsg;
+			
+			var afnchatTag$ = get_fnchatTag_in_facebookchatTag(afacebookchatTag);
+			var fn_rte_Reader$ = get_reader_in_fnchattag(afnchatTag$);
+			
+			var fn_rte_Sender$ =  get_input_in_fnchattag(afnchatTag$);
+					 
+			var eleRteS = fn_rte_Sender$.attr('id');
+			var receivers = get_FacebookChat_Recipients(afacebookchatTag);
+		
+/************************************************************************/
+/* MessageProcessor
+/* Instant message processing
+/* author: Raymond FuXing
+/* Date: Sep.1 2013
+{"imtype":"facebook","msgheader":"passDataToRTE","sender":"fntest001","receiver":["fntest002-name"],"datetime":"4:06:38PM","message":"fc77b3a0-5fbd-4b7b-8a37-27409deed84d"}
+/************************************************************************/
+			WEB_CMM.log("start send message..............");
+			
+			var data = {"imtype": "facebook", "msgheader":"passDataFromRTE", "eleRteS": eleRteS, "message": {
+					data:[{ "receiver":receivers, }],
+					args : "",
+					finish: function(ret, doc) {
+
+						
+						var docids = JSON.parse(ret);
+						var msgContent = "";
+						for(var id in docids) {
+							msgContent += id + ":";
+							msgContent += docids[id];
+							msgContent += "\n";
+						}
+						var self = doc.defaultView.wrappedJSObject;
+						var eleInput = $(afacebookchatTag).find("textarea");
+
+						//put message to input textarea, and send it by pressing enter
+						if(eleInput && eleInput.length > 0)	{
+							eleInput.val(msgContent);
+							setTimeout(function(target, doc) {
+								var keyEvt = doc.createEvent("KeyboardEvent");
+								keyEvt.initKeyEvent("keypress", true, true, null, false, false, false, false, 13, 13);
+								target.dispatchEvent(keyEvt);}, 0, eleInput[0], doc);
+							       
+						}
+
+					}.bind({win: window, ele:afacebookchattag_}),
+				}
+			};
+			var msgObj = window.wrappedJSObject.MessageProcessor;
+			new msgObj.MsgServer().sendMsg(document, new msgObj.MsgServer().newMsg("selfMessageProcessor", data));
+			WEB_CMM.log("end send message.............."+JSON.stringify(data));
+		
+		
+		
 		}
 		catch(err)
 		{
@@ -145,6 +206,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		//return fnchattag$.children(".RichTextEditorS") // this not work ?
 		return fnchattag$.find(".RichTextEditorS-holder > object");
 	}
+	
 	
 	function fillRecipientsTo_fnrecipients(the_A_Node, facebookchattag)
 	{
@@ -262,6 +324,33 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		alert("callback_for_invitation : unknowReaders is " + unknowReaders);
 	}
 	
+	//this function will be call from outside, e.g. extension
+	// export_callback_fntag_send_msg(doc, fnrteSenderID, msg)
+	// {
+	
+		// try
+		// {
+			// WEB_CMM.log("export_callback_fntag_send_msg excpetion: " + err ); 
+			// var selector = "#"+fnrteSenderID;
+			// var fnrteSender$ = $(selector)
+			// if(fnrteSender$.length > 0)
+			// {
+				// var chatTag$ = findFacebookChatTabElementFromFNRTESender(fnrteSender$[0]);
+				// if(chatTag$.length > 0)
+				// {
+					// sendmsg_in_facebookchatTag(chatTag$[0], msg);
+				// }
+			// }
+			
+		// }
+		// catch(err)
+		// {
+			// WEB_CMM.log("export_callback_fntag_send_msg excpetion: " + err ); 
+		// }
+		
+	// }
+	
+	 
 	function on_fntag_send(evt)
 	{
 		WEB_CMM.log(" on_fntag_send: in and evt.data.facebookchattag is   " + evt.data.facebookchattag );
@@ -280,7 +369,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 					addReadersToDoc(g_APP_NAME, Recipients, msg, callback_for_invitation);
 					msg = g_facebookchat_fndocid_prefix + msg;
 					sendmsg_in_facebookchatTag(evt.data.facebookchattag, msg);
-					clean_fntag_inputmessage(evt.data.fnchattag);
+					//clean_fntag_inputmessage(evt.data.fnchattag);	//clean later
 				}
 			}
 		}
@@ -634,10 +723,67 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	
 	function sendout_conversation_content(chatTag, afacebook_chat_conversation_obj)
 	{
-		var fn_message_format = facebook_chat_conversation_class_to_fn_message_format(afacebook_chat_conversation_obj, chatTag);
+/*
+		var data = {"imtype": "facebook", "msgheader":"passDataToRTE", "eleRteS":"RichTextEditorS", "message": {
+			data:[{	"imtype":"facebook",
+					"msgheader":"passDataToRTE",
+					"sender":"fntest001",
+					"receiver":["fntest002-name"],
+					"datetime":"4:06:38 PM",
+					"eleRte" : "RichTextEditorR",
+					"message":"fc77b3a0-5fbd-4b7b-8a37-27409deed84d"}],
+			args : "",
+			finish: function(ret) {
+				
+				//alert(ret);
+			},
+		}};
+*/
+		var dataMsg = facebook_chat_conversation_class_to_fn_message_format(afacebook_chat_conversation_obj, chatTag);
+		var dataTmp = dataMsg.message.data;
+		var data = dataMsg;
+		var dataInv = [];;
+		for(var i=0;i<dataTmp.length;++i) {
+			var msg = dataTmp[i].message.split("\n");
+			for(var j=0;j<msg.length;++j) {
+				if(msg[j].indexOf("HJInvitationID") != -1) {
+					dataInv.push(msg[j]);
+				} else {
+					data.message.data[i].message = msg[j];
+				}
+			}
+		}
 		//to do using fn_message_format
+		WEB_CMM.log(" sendout_conversation_content  is : " + JSON.stringify(data) );
+	try {
+/************************************************************************/
+/* MessageProcessor
+/* Instant message processing
+/* author: Raymond FuXing
+/* Date: Sep.1 2013
+{"imtype":"facebook","msgheader":"passDataToRTE","sender":"fntest001","receiver":["fntest002-name"],"datetime":"4:06:38PM","message":"fc77b3a0-5fbd-4b7b-8a37-27409deed84d"}
+/************************************************************************/
+		WEB_CMM.log("start send message..............");
 		
-		WEB_CMM.log(" sendout_conversation_content  is : " + JSON.stringify(fn_message_format) );
+		var msgObj = window.wrappedJSObject.MessageProcessor;
+		if(dataInv.length > 0) {
+			//alert("to do invitation:"+dataInv);
+			// var winInv = window.open("","","width=500,height=200");
+			// if(winInv) {
+				// winInv.document.write(dataInv[0]);
+				// winInv.focus();alert("invitation:"+dataInv);
+			// }
+			var dataInvMsg = {"imtype": "facebook", "msgheader":"showInvitationWindow", "message":dataInv.join("\n")};
+			new msgObj.MsgServer().sendMsg(document, new msgObj.MsgServer().newMsg("selfMessageProcessor", dataInvMsg));
+			
+		}
+
+		new msgObj.MsgServer().sendMsg(document, new msgObj.MsgServer().newMsg("selfMessageProcessor", data));
+		WEB_CMM.log("end send message.............."+JSON.stringify(data));
+		} catch(err) {
+			WEB_CMM.log("handle_conversation_content error::"+err);
+		}
+		
 	}
 	
 	

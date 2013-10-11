@@ -115,10 +115,10 @@ function findoutlook_composer()
 		var outlook_composer$ = $(selector_outlook_composer);
 		if(!outlook_composer$ || outlook_composer$.length == 0)
 		{
-			WEB_CMM.log( "findoutlook_composer :  not found"   );
+			//WEB_CMM.log( "findoutlook_composer :  not found"   );
 			return false;
 		}
-		WEB_CMM.log( "findoutlook_composer :  found"   );
+		//WEB_CMM.log( "findoutlook_composer :  found"   );
 		return outlook_composer$;
 	}
 	catch(err)

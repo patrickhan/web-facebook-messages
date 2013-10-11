@@ -9,16 +9,19 @@
 
 var  M_TEST =  fn_web_mocktest_ns;
 var  WEB_CMM = fn_web_common_ns;
+var TOGGLE_OPT_PERSIST = fn_web_common_persist_fn_toggle_option_ns;
+
 //gmail page parser
 var PAGE_PARSER = fn_webpage_parser_gmail_ns;
 
 //const 
-const g_interesting_webpage_reg_ex  = /^https:\/\/mail.google.com/ ;
+const g_interesting_webpage_url_rule = "^https:\/\/mail.google.com"
+const g_interesting_webpage_reg_ex  = new RegExp(g_interesting_webpage_url_rule) ;
 const g_msg_name_get_gmail_composer = "get-gmail-composer";
 const g_msg_name_status_gmail_action = "status-gmail-action";
 const g_msg_val_status_gmail_action_start = "start";
 const g_msg_val_status_gmail_action_stop = "stop";
-
+const c_msg_fn_toggle_options_persist = "fn-toggle-options-persist-msg"; //  msg type
 var  g_status_action = true;
 
 var gmail_composers = [];
@@ -47,6 +50,8 @@ function handle_gmail_composer(acomposer)
 	}
 	WEB_CMM.log( "handle_gmail_composer :  " +  acomposer );
 	
+	TOGGLE_OPT_PERSIST.persist(acomposer, g_interesting_webpage_url_rule);
+	
 
 	var forReply = isForReply(acomposer);
 	if(!forReply)
@@ -73,7 +78,7 @@ function handle_gmail_composer(acomposer)
 		//todo : store it into document.body or elsewhere
 	}
 	var subject = PAGE_PARSER.getSubject(acomposer);
-	if(!subject)
+	if(subject)
 	{
 		//todo : store it into document or elsewhere
 	}
@@ -136,26 +141,6 @@ function searchElementPresent_findgmail_composer()
 	window.setTimeout( searchElementPresent_findgmail_composer, 200);
 }
 
-function findgmail_composer()
-{
-	try
-	{
-		var gmail_composer$ = $(selector_gmail_composer);
-		if(!gmail_composer$ || gmail_composer$.length == 0)
-		{
-			WEB_CMM.log( "findgmail_composer :  not found"   );
-			return false;
-		}
-		WEB_CMM.log( "findgmail_composer :  found"   );
-		return gmail_composer$;
-	}
-	catch(err)
-	{
-		WEB_CMM.log( "findgmail_composer :  excpetion " +  err  );
-	}
-	return null;
-	
-}
 ///gmail composer part
 
 function run_gmail_fn()
@@ -166,6 +151,7 @@ function run_gmail_fn()
 }
 
 /////////////messages [
+
 self.port.on(g_msg_name_status_gmail_action, function(status) {
 
 	g_status_action = (status===g_msg_val_status_gmail_action_start);

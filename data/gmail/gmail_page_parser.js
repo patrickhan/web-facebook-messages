@@ -173,10 +173,10 @@ function findgmail_composer()
 		var gmail_composer$ = $(selector_gmail_composer);
 		if(!gmail_composer$ || gmail_composer$.length == 0)
 		{
-			WEB_CMM.log( "findgmail_composer :  not found"   );
+			//WEB_CMM.log( "findgmail_composer :  not found"   );
 			return false;
 		}
-		WEB_CMM.log( "findgmail_composer :  found : "  + gmail_composer$.length );
+		//WEB_CMM.log( "findgmail_composer :  found : "  + gmail_composer$.length );
 		return gmail_composer$;
 	}
 	catch(err)
