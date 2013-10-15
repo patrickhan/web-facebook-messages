@@ -50,58 +50,7 @@ var  WEB_CMM = fn_web_common_ns;
 	{
 		return _logic_enabled_flag;
 	}
-	
-	//var MutationEvent = MutationEvent?MutationEvent:{};
-	//var MutationEvent.MODIFICATION = 1;
-	//var MutationEvent.ADDITION = 2;
-	//var MutationEvent.REMOVAL = 3;
-	/*function on_editor_fn_toggle_options_modified_listener111(event)
-	{
-		if(!_logic_enabled())
-		{
-			return;
-		}
-		
-        var message = "";
-		try{
-        if ('attrChange' in event) {    // Firefox, Opera, Internet Explorer from version 9
-            message += "Something has happened to an attribute of the " + event.target.tagName + " element.\n";
-            alert (message);
-            switch (event.attrChange) {
-            case window.MutationEvent.MODIFICATION:
-                message += "The value of the " + event.attrName + " attribute has been changed from "
-                            + event.prevValue + " to " + event.newValue + ".";
-                set_persisted_value(event.target, event.newValue , event.data);
-                break;
-            case window.MutationEvent.ADDITION:
-                message += "The " + event.attrName + " attribute has been added to the element "
-                           + "with the value of " + event.newValue + ".";
-                set_persisted_value(event.target, event.newValue , event.data);
-                break;
-            case window.MutationEvent.REMOVAL:
-                message += "The " + event.attrName + " attribute has been removed from the element."
-                            + "The value was " + event.prevValue + " previously.";
-                remove_persisted_value(anEditor,event.data )
-                break;
-            };
-        }
-            }
-		catch(err)
-		{
-			alert(err);
-		}
-        
 
-        //if ('propertyName' in event) {  // Internet Explorer
-        //    message = "The " + event.propertyName + " property of the "
-        //               + event.srcElement.tagName + " element has been changed.";
-        //}
-		if(message.lenght > 20 )
-		{
-			alert (message);
-		}
-	}*/
-	
 	function on_editor_fn_toggle_options_modified_listener(anEditor,data)
 	{ 
 		try{
@@ -241,8 +190,8 @@ var  WEB_CMM = fn_web_common_ns;
 			var option  = $(anEditor).attr("fn-toggle-option")
 			if( !option  ||  option.length == 0)//set value only when the attr is empty
 			{
-				$(anEditor).attr("fn-toggle-option", persisted_value);//
-				log( " set : fn-toggle-option:"  + persisted_value );
+				$(anEditor).attr("fn-toggle-option-persisted", persisted_value);//
+				log( " set : fn-toggle-option-persisted:"  + persisted_value );
 			}
 		}
 		catch(err){
