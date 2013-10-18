@@ -238,6 +238,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     ns.ROLE_NAME_SEND_BOX = "send_box_";
     ns.ROLE_NAME_SEND_BY_KEYPRESS_ENTER = "keypress_enter";
     ns.ROLE_NAME_SEND_BY_MOUSE_CLICK = "mouse_click";
+	ns.FIND_COMPOSER_TIMER_SPAN = 200;
     
 })(fn_web_common_ns);
 

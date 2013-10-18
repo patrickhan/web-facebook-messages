@@ -27,7 +27,7 @@ var  g_status_action = true;
 var gmail_composers = [];
 
 
-var  gmail_composer_struct = 
+/*var  gmail_composer_struct = 
 {
 	"gmail-composer-fn-id":null,//using WEB_CMM.uniqID(20)
 	"composer" : null,
@@ -35,7 +35,7 @@ var  gmail_composer_struct =
 	"send_button" : null,
 	"msg_sending" : null,
 	"msg_last" 	  : null,
-};
+};*/
 
 //main logic 
 function handle_gmail_composer(acomposer)
@@ -48,16 +48,14 @@ function handle_gmail_composer(acomposer)
 	{
 		return;
 	}
-	WEB_CMM.log( "handle_gmail_composer :  " +  acomposer );
-	
-	TOGGLE_OPT_PERSIST.persist(acomposer, g_interesting_webpage_url_rule);
-	
-
+		
 	var forReply = isForReply(acomposer);
 	if(!forReply)
 	{
 		return;
 	}
+	log( "handle_gmail_composer : forReply  " +  acomposer );
+	TOGGLE_OPT_PERSIST.persist(acomposer, g_interesting_webpage_url_rule);
 	
 	var reply_token = PAGE_PARSER.find_reply_token(acomposer); 
 	if(reply_token)
@@ -138,7 +136,7 @@ function searchElementPresent_findgmail_composer()
 		
 	}
 	
-	window.setTimeout( searchElementPresent_findgmail_composer, 200);
+	window.setTimeout( searchElementPresent_findgmail_composer, WEB_CMM.FIND_COMPOSER_TIMER_SPAN);
 }
 
 ///gmail composer part
@@ -147,14 +145,14 @@ function run_gmail_fn()
 {
 	
 	searchElementPresent_findgmail_composer();
-	WEB_CMM.log( "run_gmail_fn : start waitforElementPresent_findgmail_composer "   );
+	log( "run_gmail_fn : start waitforElementPresent_findgmail_composer "   );
 }
 
 /////////////messages [
 
 self.port.on(g_msg_name_status_gmail_action, function(status) {
 
-	g_status_action = (status===g_msg_val_status_gmail_action_start);
+	g_status_action = status;// status is boolean
 
 });
 
@@ -167,20 +165,24 @@ function is_my_page(url_spec)
 
 self.port.on(g_msg_name_get_gmail_composer, function(url_spec) {
 
-	WEB_CMM.log( " gmail get a command :"    + g_msg_name_get_gmail_composer);
+	log( " gmail get a command :"    + g_msg_name_get_gmail_composer);
     if( is_my_page(url_spec) )
     {
-    	WEB_CMM.log( "run_gmail_fn : is_my_page"   );
+    	log( "run_gmail_fn : is_my_page"   );
         if(document.URL == url_spec)
         {
-        	WEB_CMM.log( "run_gmail_fn : document.URL == url_spec"   );
+        	log( "run_gmail_fn : document.URL == url_spec"   );
             run_gmail_fn();
         }
     }
 
 });
 /////////////messages]
-
+function log(msg)
+{
+	WEB_CMM.log( msg  );
+}
+}
 // we use waitforelementpresent to detect the gmail composer, so it has no need to addeventlistener for the page modification
 })();
 

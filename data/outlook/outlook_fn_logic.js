@@ -9,18 +9,19 @@
 
 var  M_TEST =  fn_web_mocktest_ns;
 var  WEB_CMM = fn_web_common_ns;
+var TOGGLE_OPT_PERSIST = fn_web_common_persist_fn_toggle_option_ns;
 //outlook page parser
 var PAGE_PARSER = fn_webpage_parser_outlook_ns;
 
 //const 
-const g_interesting_webpage_reg_ex  = /mail.live.com/ ;
+const g_interesting_webpage_url_rule = "mail.live.com"
+const g_interesting_webpage_reg_ex  = new RegExp(g_interesting_webpage_url_rule) ;
+
 const g_msg_name_get_outlook_composer = "get-outlook-composer";
 const g_msg_name_status_outlook_action = "status-outlook-action";
-const g_msg_val_status_outlook_action_start = "start";
-const g_msg_val_status_outlook_action_stop = "stop";
 
 var  g_status_action = true;
-
+/*
 var outlook_composers = [];
 
 
@@ -33,7 +34,7 @@ var  outlook_composer_struct =
 	"msg_sending" : null,
 	"msg_last" 	  : null,
 };
-
+*/
 //main logic 
 function handle_outlook_composer(acomposer)
 {
@@ -43,18 +44,21 @@ function handle_outlook_composer(acomposer)
 	}
 	if(acomposer.handled_in_fn_conversation)
 	{
+		//log( "return handle_outlook_composer  :   "  + acomposer.handled_in_fn_conversation);
 		return;
 	}
-	WEB_CMM.log( "handle_outlook_composer :  " +  acomposer );
-	
-
+	if(!acomposer.handled_in_fn_conversation)
+	{
+		acomposer.handled_in_fn_conversation = true;
+	}	
 	var forreply = PAGE_PARSER.isForReply(acomposer); 
 	if(!forreply)
 	{
 		return;
 	}
-	WEB_CMM.log( "isForReply :   "  + forreply);
-	
+
+	log( "handle outlook isForReply :   "  + forreply);
+	TOGGLE_OPT_PERSIST.persist(acomposer, g_interesting_webpage_url_rule);
 	var hooked  = hookSendButton(acomposer)
 	if(!hooked)
 	{
@@ -71,12 +75,6 @@ function handle_outlook_composer(acomposer)
 	if(subject)
 	{
 		//todo : store it into document or elsewhere
-	}
-	
-	
-	if(!acomposer.handled_in_fn_conversation)
-	{
-		acomposer.handled_in_fn_conversation = true;
 	}
 
 }
@@ -120,7 +118,7 @@ function searchElementPresent_findoutlook_composer()
 		handle_outlook_composer(acomposer$[0]);
 	}
 	
-	window.setTimeout( searchElementPresent_findoutlook_composer, 200);
+	window.setTimeout( searchElementPresent_findoutlook_composer, WEB_CMM.FIND_COMPOSER_TIMER_SPAN);
 }
 ///outlook composer part
 
@@ -128,13 +126,13 @@ function run_outlook_fn()
 {
 	
 	searchElementPresent_findoutlook_composer();
-	WEB_CMM.log( "run_outlook_fn : start waitforElementPresent_findoutlook_composer "   );
+	log( "run_outlook_fn : start waitforElementPresent_findoutlook_composer "   );
 }
 
 /////////////messages [
 self.port.on(g_msg_name_status_outlook_action, function(status) {
 
-	g_status_action = (status===g_msg_val_status_outlook_action_start);
+	g_status_action = status;
 
 });
 
@@ -147,20 +145,23 @@ function is_my_page(url_spec)
 
 self.port.on(g_msg_name_get_outlook_composer, function(url_spec) {
 
-	WEB_CMM.log( " outlook get a command :"    + g_msg_name_get_outlook_composer);
+	log( " outlook get a command :"    + g_msg_name_get_outlook_composer);
     if( is_my_page(url_spec) )
     {
-    	WEB_CMM.log( "run_outlook_fn : is_my_page"   );
+    	log( "run_outlook_fn : is_my_page"   );
         if(document.URL == url_spec)
         {
-        	WEB_CMM.log( "run_outlook_fn : document.URL == url_spec"   );
+        	log( "run_outlook_fn : document.URL == url_spec"   );
             run_outlook_fn();
         }
     }
 
 });
 /////////////messages]
-
+function log(msg)
+{
+	WEB_CMM.log( msg  );
+}
 // we use waitforelementpresent to detect the outlook composer, so it has no need to addeventlistener for the page modification
 })();
 

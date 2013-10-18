@@ -1,0 +1,400 @@
+<bindings xmlns="http://www.mozilla.org/xbl"
+		      xmlns:xbl="http://www.mozilla.org/xbl"
+          xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"          
+>          
+	<binding id="fncanvas">
+		<resources>
+	    </resources>
+	    <content>	    	
+	    </content>
+	    <implementation>
+            <method name="clear">                
+                <body>
+                    <![CDATA[
+                        while(this.firstChild)
+                        {
+                        	this.removeChild(this.firstChild);
+                        }
+                    ]]>
+                </body>
+            </method>
+
+			<method name="add">
+				<parameter name="addedobj"/>
+                <body>
+                    <![CDATA[
+                        this.appendChild(addedobj);
+                        this.notifyChildrenAdjust();
+                    ]]>
+                </body>
+            </method>
+
+            <method name="remove">
+				<parameter name="removedobj"/>
+                <body>
+                    <![CDATA[
+                        this.removeChild(removedobj);
+                        this.notifyChildrenAdjust();
+                    ]]>
+                </body>
+            </method>
+
+            <method name="notifyChildrenAdjust">
+            <body>
+                    <![CDATA[
+                     	var anode = this.firstChild;
+                     	while(anode != null)
+                        {
+                        	let evt = document.createEvent("CustomEvent");
+                            evt.initCustomEvent("adjustDisplayOnFnDrawLayer", true, false, null);
+                            anode.dispatchEvent(evt);
+                        	anode = anode.nextSibling;
+                        }
+                    ]]>
+                </body>
+            </method>
+            
+        </implementation>
+    </binding>
+
+    <binding id="fnEncButton">
+		<resources>
+	    </resources>
+	    <content>	    
+	    	<xul:image class="fnEncButton_ButtonImage" src="chrome://webpagesvr/content/images/FNToggleButton.png" />
+	    </content>
+	    <handlers>
+	    	<handler event="adjustDisplayOnFnDrawLayer"> <![CDATA[
+                if(this.tracedObj != null)
+                {
+                	let rect = ECHelperNS.getElementRectToOutmostWin_Zoom(this.tracedObj);
+                	if(rect.right > rect.left && rect.bottom >  rect.top)
+                	{
+   	                	this.style.display = "block";
+	                	this.style.left = rect.right + "px";
+	                	this.style.top =  rect.top + "px";
+	                }
+	                else if(this.tracedObj.parentNode != null)
+	                {
+	                	this.style.display = "none";
+	                }
+	                else
+	                {
+	                	this.parentNode.remove(this);
+	                }
+	                
+                }
+    		  ]]>
+    		  </handler>
+    		 <handler event="click"> <![CDATA[
+    		 				this.checked = !this.checked;// flag setting
+                if(this.tracedObj != null)
+                {
+                	this.tracedObj.setAttribute("toggleCommandChecked", this.checked.toString() ); 
+	                
+                }
+    		  ]]>
+    		  </handler> 
+	    </handlers>
+
+		<implementation>
+			<field name="tracedObj">null</field>	
+			<field name="checked">false</field>		
+	    </implementation>
+    </binding>
+
+    <binding id="fnOptionButton">
+		<resources>
+	    </resources>
+	    <content>
+	    	<xul:hbox>
+	    		<xul:label id="fnOptionButton_Label" class="fnOptionButton_ButtonLable" onclick="parentNode.parentNode.toggleSetReaderUI();"/>
+	    		<xul:image class="fnOptionButton_ButtonImage" src="chrome://webpagesvr/content/images/FNToggleButton.PNG" onclick="parentNode.parentNode.showPopMenu();"/>
+	    		<xul:panel id="popup-toggle-options-panel" style="pinter-events:auto" position="after_pointer">
+	    			<xul:checkbox label="CIA Mode" id="options-antispy-plus" oncommand="parentNode.parentNode.parentNode.antispyCheckProcess(this)" />
+	    			<xul:checkbox label="Encryption" id="options-enc" />
+	    			<xul:button label="Ok" onclick="parentNode.parentNode.parentNode.setEncModeUI(this);" />
+	    		</xul:panel>
+	    	</xul:hbox>
+	    </content>
+	    <handlers>
+	    	<handler event="adjustDisplayOnFnDrawLayer"> <![CDATA[
+                if(this.tracedObj != null)
+                {
+                	let rect = ECHelperNS.getElementRectToOutmostWin_Zoom(this.tracedObj);
+                	let myrect = this.getBoundingClientRect();
+                	let mywidth = myrect.right - myrect.left;                 	
+                	if(rect.right > rect.left && rect.bottom >  rect.top)
+                	{
+   	                	this.style.display = "block";
+	                	this.style.left = (rect.right - mywidth) +  "px";	                	
+	                	this.style.top =  rect.top + "px";
+	                }
+	                else if(this.tracedObj.parentNode != null)
+	                {
+	                	this.style.display = "none";
+	                }
+	                else
+	                {
+	                	this.parentNode.remove(this);
+	                }
+	                
+                }1
+    		  ]]>
+    		 </handler>    	 
+    		 <handler event="mouseover"> <![CDATA[
+    		 	this.isout = true;    		 	
+    		  ]]>
+    		 </handler>  
+    		 <handler event="mouseout"> <![CDATA[ 
+    		 	this.isout = false;
+                EcselfDefineGlobalScope.toggleAnElement(this.tracedObj);
+    		  ]]>
+    		 </handler>    
+	    </handlers>
+
+		<implementation>
+			<field name="tracedObj">null</field>	
+			<field name="checked">false</field>		
+			<field name="isout">false</field>
+
+			<constructor>        	  	
+                <![CDATA[         
+								
+                	setTimeout(function(self){
+					try{
+                		if(self.tracedObj !== undefined && self.tracedObj.currentReaders !== undefined)
+                		{
+                			let lb = document.getAnonymousElementByAttribute(self, "id", "fnOptionButton_Label");
+                			let counter = 0;
+				            for(let key in self.tracedObj.currentReaders)
+				            {
+				                ++counter;
+				            }
+                			lb.value = counter;
+                			lb.style.height="18px";
+                			lb.style.width="18px";  
+                			
+							let evt = document.createEvent("CustomEvent");
+                            evt.initCustomEvent("adjustDisplayOnFnDrawLayer", true, false, null);
+                            self.dispatchEvent(evt);
+							
+                		}
+						if(self.tracedObj)
+						{
+							//add  a listner for event "fn-toggle-option-persisted"
+							self.checkPersistToggleOptions();
+						}
+					  }catch(err){alert(" fncavas.xml constructor error: "+err)}
+                	}, 100, this);
+        		]]>
+        	</constructor>
+ 			<method name="checkPersistToggleOptions">
+	            <body>
+	                <![CDATA[
+	                 try{
+							let self = this;
+							
+							//check  for attr "fn-toggle-option-persisted"
+							//alert('check fn-toggle-option-persisted:' , + self.tracedObj)
+								
+							let theElement = self.tracedObj;
+							var toggle_option = theElement.getAttribute("fn-toggle-option-persisted");
+							if(toggle_option)
+							{	
+								theElement.removeAttribute("fn-toggle-option-persisted");
+								if(toggle_option === "FNRTE")
+								{	//setEncMode(erncObj_checked, antispyobj_checked, ignore_persist)
+									self.setEncMode(true, true, true);
+								}
+								else if(toggle_option === "original")
+								{
+									self.setEncMode(true, false, true);
+								}
+							}
+                		}
+						catch(err){
+							alert(" addPersistToggleOptionsListener error: "+err)
+							}		                
+	                ]]>
+                </body>
+            </method>       	
+			<method name="showPopMenu">
+	            <body>
+	                <![CDATA[
+	                 	let popedMenu = document.getAnonymousElementByAttribute(this, "id", "popup-toggle-options-panel");
+	                 	popedMenu.openPopup(this, "start_before",0,0 ,false, false);
+	                 	let antispyobj = popedMenu.firstChild;
+	                 	let erncObj = antispyobj.nextSibling;
+	                 	if(this.tracedObj.anticpychecked !== undefined &&
+	                 	   this.tracedObj.encchecked !== undefined)
+	                 	{
+		                 	antispyobj.checked = this.tracedObj.anticpychecked;
+		                 	erncObj.checked = this.tracedObj.encchecked;
+		                 	erncObj.disabled = antispyobj.checked;
+		                }		                
+	                ]]>
+                </body>
+            </method>
+            
+            <method name="toggleSetReaderUI">
+	            <body>
+	                <![CDATA[
+	                 	SETREADERFORANINPUT.toggleSetReaderUI(this.tracedObj);	                
+	                ]]>
+                </body>
+            </method>
+
+            <method name="antispyCheckProcess">
+	            <parameter name="thisobj"/>
+	            <body>
+	                <![CDATA[	                    
+	                 	let erncObj = thisobj.nextSibling;
+	                 	if(thisobj.checked == true)
+	                 	{
+	                 		erncObj.checked = true;
+	                 		erncObj.disabled = true;
+	                 	}
+	                 	else
+	                 	{
+	                 		erncObj.disabled = false;
+	                 	}
+	                ]]>
+	            </body>
+            </method>
+
+            <method name="setEncModeUI">
+	            <parameter name="thisobj"/>
+	            <body>
+	                <![CDATA[	                    
+
+						try
+	                    {
+							let erncObj = thisobj.previousSibling;
+							let erncObj_checked = thisobj.previousSibling.checked;
+							let antispyobj_checked = erncObj.previousSibling.checked;
+							thisobj.parentNode.hidePopup();
+							this.setEncMode(erncObj_checked, antispyobj_checked, false);
+	
+		                }catch(err){alert("setEncModeUI Error: " + err)}                   
+		                 	
+	                ]]>
+	            </body>
+            </method>
+			<method name="setEncMode">
+	            <parameter name="erncObj_checked"/>
+				<parameter name="antispyobj_checked"/>
+				<parameter name="ignore_persist"/>
+	            <body>
+	                <![CDATA[	                    
+
+						try
+	                    {
+							let theElement = this.tracedObj;
+							this.tracedObj.encchecked = erncObj_checked;
+							this.tracedObj.anticpychecked = antispyobj_checked;
+							if(antispyobj_checked == true)
+	                        {
+
+								theElement.setAttribute("fn-toggle-option", "FNRTE");
+								if(!ignore_persist)
+								{
+									var event = document.createEvent("HTMLEvents");
+									event.initEvent("fn-toggle-option-changed", true, false);
+									theElement.dispatchEvent(event);
+								}		                        
+								this.setAttribute("fn-toggle-option", "FNRTE");
+		                        this.setAttribute("fntoggledURL", "toggle_withWebPageNoReceipts.html");
+	                        	
+		                        //alert(theElement.tagName + "  " + theElement.contentDocument.body);
+		                        if(theElement.tagName == "IFRAME")
+		                        {
+		                            theElement.framefocusListener = theElement.contentDocument.addEventListener("focus", function(evt){							    
+			                            let evt = document.createEvent("CustomEvent");
+	                                    evt.initCustomEvent("FnInputEleFocus", true, false, null);
+	                                    theElement.dispatchEvent(evt);
+			                        },false);							
+		                        }
+	                        }
+	                        else if( erncObj_checked== true)
+	                        {	                        	
+		                        theElement.setAttribute("fn-toggle-option", "original");
+								if(!ignore_persist)
+								{
+									var event = document.createEvent("HTMLEvents");
+									event.initEvent("fn-toggle-option-changed", true, false);
+									theElement.dispatchEvent(event);
+								}								
+		                        this.setAttribute("fn-toggle-option", "original")
+		                        this.removeAttribute("fntoggledURL")
+	                        }
+	                        else
+	                        {	                        	
+		                        theElement.removeAttribute("fn-toggle-option");
+								if(!ignore_persist)
+								{
+									var event = document.createEvent("HTMLEvents");
+									event.initEvent("fn-toggle-option-removed", true, false);
+									theElement.dispatchEvent(event);
+								}								
+		                        this.removeAttribute("fn-toggle-option");
+		                        this.removeAttribute("fntoggledURL")
+	                        	
+		                        if(theElement.framefocusListener !== undefined)
+		                        {
+		                            theElement.contentDocument.removeEventListener(theElement.framefocusListener);
+		                        }
+	                        }
+
+	                        if(antispyobj_checked == false && erncObj_checked == true)
+	                        {
+	                        	FNCANVASOPERNP.removeAButtonOnFnDrawLayer_V2(theElement, "fnEncButton");
+	                        }
+	                           
+		                   //right now the logic is trigged by the event on focus, so do not call the function right here
+		                   let fntoggleopts = theElement.getAttribute("fn-toggle-option");
+		                   if(fntoggleopts == "original" )
+		                   {
+	    	               
+					           if(theElement.tagName == "IFRAME" && theElement.framefocusListener === undefined)
+							    {
+							        theElement.framefocusListener = theElement.contentDocument.addEventListener("focus", function(evt){							    
+								        let evt = document.createEvent("CustomEvent");
+	                                    evt.initCustomEvent("FnInputEleFocus", true, false, null);
+	                                    theElement.dispatchEvent(evt);
+								    },false);							
+							    }
+			                   let toggleBussinessobj = Components.classes["@fntechnologies.com/webpgjsCOM/toggleBussiness;1"].
+			                                              createInstance(Components.interfaces.nsIToggleBussiness);
+						        if(toggleBussinessobj != null)
+						        {
+	    					    				
+						            toggleBussinessobj.toggledPlg = theElement;
+									toggleBussinessobj.toggle(this);
+						        }
+		            	      }
+		            	      else
+		            	      {
+	    					    g_OETManager.release(theElement);
+		            	      }
+	    	            	  
+		            	    if(theElement.tagName == "IFRAME" )
+						    {
+							    toMakeAkeyDownAction(theElement.contentDocument.body); // for face book page
+						    }
+						    else
+						    {
+		            	  	    //setTimeout( function(){toMakeAkeyDownAction(theElement);}, 1000) // for face book page
+		            	    }
+		                    this.isout = false;
+			                EcselfDefineGlobalScope.toggleAnElement(this.tracedObj);
+		                }catch(err){alert("setEncMode Error: " + err)}                   
+		                 	
+	                ]]>
+	            </body>
+            </method>            
+	    </implementation>
+    </binding>
+</bindings>
+
+

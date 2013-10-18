@@ -26,14 +26,14 @@ const selector_yahoo_composer_subjectbox = "span.thread-subject";   //maybe use 
 function get_latest_HJContentID(acomposer)
 {
 	var content  = $(acomposer).text();
-	WEB_CMM.log( "$(acomposer).contents() :  + "  +   content );
+	log( "$(acomposer).contents() :  + "  +   content );
 	var results = content.match( WEB_CMM.HJContentIDRegEx );
 	if(results)
 	{
 		var docid = results[0];
 		docid =  docid.substring( docid.indexOf(":") + 1 );// remove the prefix 
 		
-		WEB_CMM.log( "get_latest_HJContentID :  + "  +   docid );
+		log( "get_latest_HJContentID :  + "  +   docid );
 		return docid;
 	}
 	return null;
@@ -42,17 +42,17 @@ function get_latest_HJContentID(acomposer)
 ////////////////send box part[
 function findSendButton_from_composer(acomposer)
 {
-	WEB_CMM.log( "hookSendButton :  + "  +  acomposer );
+	log( "hookSendButton :  + "  +  acomposer );
 	//we want to find out the 'table' element of acomposer's closest ansestor
 	var parent_table$ =  $(acomposer).closest(selector_table);
 	if(parent_table$ && parent_table$.length > 0)
 	{	//there is a div whose content is 'Send'
-		WEB_CMM.log( "hookSendButton :  + parent_table$ found"  );
+		log( "hookSendButton :  + parent_table$ found"  );
 		var sendbox$ = $(selector_yahoo_composer_sendbox, parent_table$).parent();
 		
 		if(sendbox$ && sendbox$.length > 0)
 		{
-			WEB_CMM.log( "sendbox$ : found  " );
+			log( "sendbox$ : found  " );
 			return sendbox$[0];
 		}
 	}
@@ -69,16 +69,16 @@ function findSendButton_from_composer(acomposer)
 //composer: iframe-table-table-td
 function find_tobox(acomposer)
 {
-	WEB_CMM.log( "find_tobox  from :  + "  +  acomposer );
+	log( "find_tobox  from :  + "  +  acomposer );
 	//we want to find out the 'table' element of acomposer's closest ansestor
 	var parent_table$ =  $(acomposer).closest(selector_table);
 	if(parent_table$ && parent_table$.length > 0)
 	{	
-		WEB_CMM.log( "parent_table$ : found  " );
+		log( "parent_table$ : found  " );
 		var tobxo$ = parent_table$.find(selector_yahoo_composer_tobox);
 		if(tobxo$ && tobxo$.length > 0)
 		{
-			WEB_CMM.log( "tobxo$ : found  " + tobxo$.length);
+			log( "tobxo$ : found  " + tobxo$.length);
 			return tobxo$;
 		}
 	}
@@ -89,9 +89,10 @@ function toBoxIsFilled(acomposer)
 {
 	var tobxo$ = find_tobox(acomposer);
 	var recipients = tobxo$.text();
+	recipients = recipients.replace(/\s+/g, '');//remove blank chars
 	if(recipients.length > 0) 
 	{
-		WEB_CMM.log( "tobox : recipient is   " + recipients );
+		log( "tobox : recipient is   " + recipients );
 		return true;
 	}
 	return false;
@@ -118,12 +119,12 @@ function find_reply_token(acomposer)
 	var parent_table$ =  $(acomposer).closest(selector_table);
 	if(parent_table$ && parent_table$.length > 0)
 	{
-		WEB_CMM.log( "find_reply_token :  parent_table$  ok"  );
+		log( "find_reply_token :  parent_table$  ok"  );
 		//there is  an div which has : 'Show message history'
 		var show_trimmed_content_element$ = parent_table$.find( selector_yahoo_composer_reply_Show_message_history_element );
 		if(show_trimmed_content_element$ && show_trimmed_content_element$.length > 0)
 		{
-			WEB_CMM.log( "findyahoo_composer :  show_trimmed_content  found"   );
+			log( "findyahoo_composer :  show_trimmed_content  found"   );
 			return show_trimmed_content_element$[0];
 		}
 	}
@@ -132,7 +133,7 @@ function find_reply_token(acomposer)
 
 function expand_show_trimmed_content(reply_token)
 {
-	WEB_CMM.log( "expand_show_trimmed_content : reply_tokenis  "   + reply_token );
+	log( "expand_show_trimmed_content : reply_tokenis  "   + reply_token );
 	$(reply_token).mouseover();
 	$(reply_token).click();
 }
@@ -147,15 +148,15 @@ function findyahoo_composer()
 		var yahoo_composer$ = $(selector_yahoo_composer);
 		if(!yahoo_composer$ || yahoo_composer$.length == 0)
 		{
-			//WEB_CMM.log( "findyahoo_composer :  not found"   );
+			//log( "findyahoo_composer :  not found"   );
 			return false;
 		}
-		//WEB_CMM.log( "findyahoo_composer :  found "  +  yahoo_composer$.length);
+		//log( "findyahoo_composer :  found "  +  yahoo_composer$.length);
 		return yahoo_composer$;
 	}
 	catch(err)
 	{
-		WEB_CMM.log( "findyahoo_composer :  excpetion " +  err  );
+		log( "findyahoo_composer :  excpetion " +  err  );
 	}
 	return null;
 	
@@ -172,10 +173,13 @@ function getSubjectBox(acomposer)
 function getSubject(acomposer)
 {
 	var subject = getSubjectBox(acomposer).text();
-	WEB_CMM.log( "yahoo getSubject :  subject is:" +  subject  );
+	log( "yahoo getSubject :  subject is:" +  subject  );
 	return subject;
 }
-
+function log(msg)
+{
+	WEB_CMM.log( msg  );
+}
 /////////// subject part
 //export
     //functions

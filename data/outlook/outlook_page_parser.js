@@ -12,7 +12,7 @@ var fn_webpage_parser_outlook_ns  = (undefined === fn_webpage_parser_outlook_ns)
 var  M_TEST =  fn_web_mocktest_ns;
 var  WEB_CMM = fn_web_common_ns;
 
-const selector_outlook_composer = "#ComposeRteEditor_surface"   //iframe and id = ComposeRteEditor_surface
+const selector_outlook_composer = "#ComposeRteEditor_surface:visible"   //iframe and id = ComposeRteEditor_surface
 
 const selector_outlook_composer_sendbox = "#SendMessage"; //div and  id = SendMessage
 const selector_outlook_composer_subjectbox = "#fSubject"; // input and id = fSubject
@@ -25,14 +25,14 @@ const reply_token_in_subject = "RE: ";
 function get_latest_HJContentID(acomposer)
 {//composer is a iframe , get its content text
 	var content  = $(acomposer).contents().find("body").text();
-	WEB_CMM.log( "$(acomposer).contents() :  + "  +   content );
+	log( "$(acomposer).contents() :  + "  +   content );
 	var results = content.match( WEB_CMM.HJContentIDRegEx );
 	if(results)
 	{
 		var docid = results[0];
 		docid =  docid.substring( docid.indexOf(":") + 1 );// remove the prefix 
 		
-		WEB_CMM.log( "get_latest_HJContentID :  + "  +   docid );
+		log( "get_latest_HJContentID :  + "  +   docid );
 		return docid;
 	}
 	return null
@@ -41,12 +41,12 @@ function get_latest_HJContentID(acomposer)
 ////////////////send box part[
 function findSendButton_from_composer(acomposer)
 {
-	WEB_CMM.log( "hookSendButton :  + "  +  acomposer );
+	log( "hookSendButton :  + "  +  acomposer );
 	var sendbox$ = $(selector_outlook_composer_sendbox);
 	
 	if(sendbox$ && sendbox$.length > 0)
 	{
-		WEB_CMM.log( "sendbox$ : found  " );
+		log( "sendbox$ : found  " );
 		return sendbox$[0];
 	}
 	
@@ -93,9 +93,10 @@ function isForReply(acomposer)
 	if(outlook_tobox$ && outlook_tobox$.length > 0)
 	{
 		var recipients = outlook_tobox$.text();
+		recipients = recipients.replace(/\s+/g, '');//remove blank chars
 		if(recipients.length > 0) //.cp_inputContainer
 		{
-			WEB_CMM.log( "tobox : recipient is   " + recipients );
+			log( "tobox : recipient is   " + recipients );
 			recipient_not_empty = true;
 		}
 		
@@ -115,15 +116,15 @@ function findoutlook_composer()
 		var outlook_composer$ = $(selector_outlook_composer);
 		if(!outlook_composer$ || outlook_composer$.length == 0)
 		{
-			//WEB_CMM.log( "findoutlook_composer :  not found"   );
+			//log( "findoutlook_composer :  not found"   );
 			return false;
 		}
-		//WEB_CMM.log( "findoutlook_composer :  found"   );
+		//log( "findoutlook_composer :  found"   );
 		return outlook_composer$;
 	}
 	catch(err)
 	{
-		WEB_CMM.log( "findoutlook_composer :  excpetion " +  err  );
+		log( "findoutlook_composer :  excpetion " +  err  );
 	}
 	return null;
 	
@@ -145,12 +146,15 @@ function getSubject(acomposer)
 		subject = subject.substring(reply_token_in_subject.length -1);
 	}	
 	
-	WEB_CMM.log( "outlook getSubject :  subject is:" +  subject  );
+	log( "outlook getSubject :  subject is:" +  subject  );
 	return subject;
 }
 
 /////////// subject part
-
+function log(msg)
+{
+	WEB_CMM.log( msg  );
+}
 
 //export
     //functions

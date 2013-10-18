@@ -9,15 +9,17 @@
 
 var  M_TEST =  fn_web_mocktest_ns;
 var  WEB_CMM = fn_web_common_ns;
+var TOGGLE_OPT_PERSIST = fn_web_common_persist_fn_toggle_option_ns;
 //yahoo page parser
 var PAGE_PARSER = fn_webpage_parser_yahoo_ns;
 
 //const 
-const g_interesting_webpage_reg_ex  = /mail.yahoo.com/ ;
+const g_interesting_webpage_url_rule = "mail.yahoo.com"
+const g_interesting_webpage_reg_ex  = new RegExp(g_interesting_webpage_url_rule) ;
+
 const g_msg_name_get_yahoo_composer = "get-yahoo-composer";
 const g_msg_name_status_yahoo_action = "status-yahoo-action";
-const g_msg_val_status_yahoo_action_start = "start";
-const g_msg_val_status_yahoo_action_stop = "stop";
+
 
 var  g_status_action = true;
 
@@ -45,14 +47,13 @@ function handle_yahoo_composer(acomposer)
 	{
 		return;
 	}
-	WEB_CMM.log( "handle_yahoo_composer :  " +  acomposer );
-	
 	var forReply = isForReply(acomposer);
 	if(!forReply)
 	{
 		return;
 	}
-	WEB_CMM.log( "handle_yahoo_composer : it is for reply  "  );
+	log( "handle_yahoo_composer : it is for reply  "  );
+	TOGGLE_OPT_PERSIST.persist(acomposer, g_interesting_webpage_url_rule);
 	var reply_token = PAGE_PARSER.find_reply_token(acomposer); 
 	if(reply_token)
 	{//to be able to get the last email content, we must click the reply_token element()
@@ -76,11 +77,11 @@ function handle_yahoo_composer(acomposer)
 	if(subject)
 	{
 		//todo : store it into document or elsewhere
-		WEB_CMM.log( "try  : find_tobox "  );
+		log( "try  : find_tobox "  );
 		tobox$ = PAGE_PARSER.find_tobox(acomposer);
 		if(tobox$ && tobox$.length > 0)
 		{
-			WEB_CMM.log( "try  : save_Stream_topic "  );
+			log( "try  : save_Stream_topic "  );
 			fn_web_conversation_common_ns.save_Stream_topic(self, subject, tobox$[0]);
 		}
 	}
@@ -150,7 +151,7 @@ function searchElementPresent_findyahoo_composer()
 		}
 	}
 	
-	window.setTimeout( searchElementPresent_findyahoo_composer, 200);
+	window.setTimeout( searchElementPresent_findyahoo_composer, WEB_CMM.FIND_COMPOSER_TIMER_SPAN);
 }
 
 ///yahoo composer part
@@ -159,13 +160,13 @@ function run_yahoo_fn()
 {
 	
 	searchElementPresent_findyahoo_composer();
-	WEB_CMM.log( "run_yahoo_fn : start waitforElementPresent_findyahoo_composer "   );
+	log( "run_yahoo_fn : start waitforElementPresent_findyahoo_composer "   );
 }
 
 /////////////messages [
 self.port.on(g_msg_name_status_yahoo_action, function(status) {
 
-	g_status_action = (status===g_msg_val_status_yahoo_action_start);
+	g_status_action = status;
 
 });
 
@@ -178,20 +179,23 @@ function is_my_page(url_spec)
 
 self.port.on(g_msg_name_get_yahoo_composer, function(url_spec) {
 
-	WEB_CMM.log( " yahoo get a command :"    + g_msg_name_get_yahoo_composer);
+	log( " yahoo get a command :"    + g_msg_name_get_yahoo_composer);
     if( is_my_page(url_spec) )
     {
-    	WEB_CMM.log( "run_yahoo_fn : is_my_page"   );
+    	log( "run_yahoo_fn : is_my_page"   );
         if(document.URL == url_spec)
         {
-        	WEB_CMM.log( "run_yahoo_fn : document.URL == url_spec"   );
+        	log( "run_yahoo_fn : document.URL == url_spec"   );
             run_yahoo_fn();
         }
     }
 
 });
 /////////////messages]
-
+function log(msg)
+{
+	WEB_CMM.log( msg  );
+}
 // we use waitforelementpresent to detect the yahoo composer, so it has no need to addeventlistener for the page modification
 })();
 

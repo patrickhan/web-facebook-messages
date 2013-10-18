@@ -32,14 +32,14 @@ const gmail_reply_prefix = "Re: ";
 function get_latest_HJContentID(acomposer)
 {
 	var content  = $(acomposer).contents().find("body").text();
-	WEB_CMM.log( "$(acomposer).contents() :  + "  +   content );
+	log( "$(acomposer).contents() :  + "  +   content );
 	var results = content.match( WEB_CMM.HJContentIDRegEx );
 	if(results)
 	{
 		var docid = results[0];
 		docid =  docid.substring( docid.indexOf(":") + 1 );// remove the prefix 
 		
-		WEB_CMM.log( "get_latest_HJContentID :  + "  +   docid );
+		log( "get_latest_HJContentID :  + "  +   docid );
 		return docid;
 	}
 	return null;
@@ -48,7 +48,7 @@ function get_latest_HJContentID(acomposer)
 ////////////////send box part[
 function findSendButton_from_composer(acomposer)
 {
-	WEB_CMM.log( "hookSendButton :  + "  +  acomposer );
+	log( "hookSendButton :  + "  +  acomposer );
 	//we want to find out the 'table' element of acomposer's closest ansestor
 	var parent_table$ =  $(acomposer).closest(selector_gmail_composer_parent_table);
 	//we want to find out the 'table' element of parent_table$ closest ansestor, using closest. will return itself
@@ -59,7 +59,7 @@ function findSendButton_from_composer(acomposer)
 		
 		if(sendbox$ && sendbox$.length > 0)
 		{
-			WEB_CMM.log( "sendbox$ : found  " );
+			log( "sendbox$ : found  " );
 			return sendbox$[0];
 		}
 	}
@@ -73,23 +73,23 @@ function findSendButton_from_composer(acomposer)
 //composer: iframe-table-table-td
 function find_tobox(acomposer)
 {
-	WEB_CMM.log( "find_tobox  from :  + "  +  acomposer );
+	log( "find_tobox  from :  + "  +  acomposer );
 	//we want to find out the 'table' element of acomposer's closest ansestor
 	var parent_table$ =  $(acomposer).closest(selector_table);
 	//we want to find out the 'table' element of parent_table$ closest ansestor, using closest. will return itself
 	var parent_table_table$ =  parent_table$.parent().closest(selector_table);
 	if(parent_table_table$ && parent_table_table$.length > 0)
 	{	
-		WEB_CMM.log( "parent_table_table$ : found  " );
+		log( "parent_table_table$ : found  " );
 		//there is common td
 		var parent_common_td$ =  parent_table_table$.closest(selector_td);
 		if(parent_common_td$ && parent_common_td$.length > 0)
 		{
-			WEB_CMM.log( "parent_common_td$ : found  " );
+			log( "parent_common_td$ : found  " );
 			var tobxo$ = parent_common_td$.find(selector_gmail_composer_tobox_from_form);
 			if(tobxo$ && tobxo$.length > 0)
 			{
-					WEB_CMM.log( "tobxo$ : found  " );
+					log( "tobxo$ : found  " );
 					return tobxo$;
 			}
 		}
@@ -102,11 +102,8 @@ function toBoxIsFilled(acomposer)
 	var tobxo$ = find_tobox(acomposer);
 	if(tobxo$)
 	{
-		if(tobxo$.is(":visible")  )
+		/*if(tobxo$.is(":visible")  )
 		{
-			/*WEB_CMM.log( "toBox Is  ="  + tobxo$[0] );
-			var recipients = tobxo$.val();
-			if(recipients.length > 0 )*/
 			var offset = tobxo$.offset();
 			if(offset.left >8 || offset.top >8)// if the tobxo$ is move to right or move down then there is recipient inserted
 			{
@@ -114,14 +111,14 @@ function toBoxIsFilled(acomposer)
 				return true;
 			}
 		}
-		else
+		else*/
 		{//if the editor is invisible , check the content text 
 			var recipients$  = tobxo$.closest(selector_table).closest(selector_td).find(selector_gmail_composer_tobox_emial_spans);
 			if(recipients$ && recipients$.length > 0)
 			{
 				recipients$.each(function(index)
 				{
-					WEB_CMM.log( "toBoxIsFilled :  recipient = "  + $(this).attr('email')  );
+					log( "toBoxIsFilled :  recipient = "  + $(this).attr('email')  );
 				});
 				return true;
 			}	
@@ -141,12 +138,12 @@ function find_reply_token(acomposer)
 	var parent_table_td$ =  parent_table$.closest(selector_gmail_composer_parent_table_td);
 	if(parent_table_td$ && parent_table_td$.length > 0)
 	{
-		WEB_CMM.log( "check_for_reply :  parent_table_td$  ok"  );
+		log( "check_for_reply :  parent_table_td$  ok"  );
 		//there is  an image which has tool tip : 'Show trimmed content'
 		var show_trimmed_content_element$ = parent_table_td$.find( selector_gmail_composer_parent_td_Show_trimmed_content_element );
 		if(show_trimmed_content_element$ && show_trimmed_content_element$.length > 0)
 		{
-			WEB_CMM.log( "findgmail_composer :  show_trimmed_content  found"   );
+			log( "findgmail_composer :  show_trimmed_content  found"   );
 			return show_trimmed_content_element$[0];
 		}
 	}
@@ -159,7 +156,7 @@ function find_reply_token(acomposer)
 
 function expand_show_trimmed_content(reply_token)
 {
-	WEB_CMM.log( "expand_show_trimmed_content : reply_tokenis  "   + reply_token );
+	log( "expand_show_trimmed_content : reply_tokenis  "   + reply_token );
 	$(reply_token).click();
 }
 ///reply token part]
@@ -173,15 +170,15 @@ function findgmail_composer()
 		var gmail_composer$ = $(selector_gmail_composer);
 		if(!gmail_composer$ || gmail_composer$.length == 0)
 		{
-			//WEB_CMM.log( "findgmail_composer :  not found"   );
+			//log( "findgmail_composer :  not found"   );
 			return false;
 		}
-		//WEB_CMM.log( "findgmail_composer :  found : "  + gmail_composer$.length );
+		//log( "findgmail_composer :  found : "  + gmail_composer$.length );
 		return gmail_composer$;
 	}
 	catch(err)
 	{
-		WEB_CMM.log( "findgmail_composer :  excpetion " +  err  );
+		log( "findgmail_composer :  excpetion " +  err  );
 	}
 	return null;
 	
@@ -192,23 +189,23 @@ function findgmail_composer()
 function getSubjectBox(acomposer)
 {
 	
-	WEB_CMM.log( "getSubjectBox  from :  + "  +  acomposer );
+	log( "getSubjectBox  from :  + "  +  acomposer );
 	//we want to find out the 'table' element of acomposer's closest ansestor
 	var parent_table$ =  $(acomposer).closest(selector_table);
 	//we want to find out the 'table' element of parent_table$ closest ansestor, using closest. will return itself
 	var parent_table_table$ =  parent_table$.parent().closest(selector_table);
 	if(parent_table_table$ && parent_table_table$.length > 0)
 	{	
-		WEB_CMM.log( " getSubjectBox parent_table_table$ : found  " );
+		log( " getSubjectBox parent_table_table$ : found  " );
 		//there is common td
 		var parent_common_td$ =  parent_table_table$.closest(selector_td);
 		if(parent_common_td$ && parent_common_td$.length > 0)
 		{
-			WEB_CMM.log( "getSubjectBox parent_common_td$ : found  " );
+			log( "getSubjectBox parent_common_td$ : found  " );
 			var subjectbxo$ = parent_common_td$.find(selector_gmail_composer_subjectbox_from_form);
 			if(subjectbxo$ && subjectbxo$.length > 0)
 			{
-					WEB_CMM.log( "subjectbxo$ : found  " );
+					log( "subjectbxo$ : found  " );
 					return subjectbxo$;
 			}
 		}
@@ -225,10 +222,14 @@ function getSubject(acomposer)
 		subject = subject.substring(gmail_reply_prefix.length -1);
 	}
 	
-	WEB_CMM.log( "gmail getSubject :  subject is:" +  subject  );
+	log( "gmail getSubject :  subject is:" +  subject  );
 	return subject;//table: role="presentation" h1
 }
 
+function log(msg)
+{
+	WEB_CMM.log( msg  );
+}
 /////////// subject part
 //export
     //functions
