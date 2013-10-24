@@ -15,9 +15,12 @@ var WEB_TEST = facebook_test_ns;//.create_test_panel =  create_test_panel;
 
     const g_facebook_chat_div_classname =  "fbNubFlyout fbDockChatTabFlyout";
 	const g_fn_toggle_init_event_name = "FnInputEleFocus";
-	const g_facebookchat_fndocid_prefix = "fnfacebookchatid:";
+	const g_facebookchat_fndocid_prefix = "HJContentID:";
 	const g_APP_NAME = "facebook";
-	
+	const c_msg_name_facebook_after_fn_logic_excute = "facebook_after_fn_logic_excute";//from page content,  tell the addon, facebook_after_fn_logic_excute
+	const c_msg_name_getEditors_action = "getEditors";// tell the page content js to get Editors interested
+	const c_msg_name_facebook_prompt_import_contacts = "facebook_prompt_import_contacts";//to page content,  to prompt users to import the contact in facebook
+
 	function findFacebookChatTabElementFromInputbox(anInput)
 	{
         if(!anInput)
@@ -929,6 +932,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	
 	function toggle_FacebookChat( input, chatTag ,show)
 	{
+		
 	    WEB_CMM.log(" toggle_FacebookChat: " + chatTag );
 		if(!input || !chatTag)
 		{
@@ -990,23 +994,37 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	function add_FNToggle_editor_focus_listener() {
 		document.addEventListener(g_fn_toggle_init_event_name, _FNToggle_editor_focus_listener, true);
 	}
-			
-
+	
+	function facebook_prompt_import_contacts()
+	{
+		WEB_CMM.log(" on facebook_prompt_import_contacts "   );
+	}
+	
+/////////////messages [
+	
 	function is_my_page(url_spec)
 	{
 		return true; //chat is in everywhere
-	}        
-			
-	self.port.on("getEditors", function(url_spec) {
+	} 
+	
+	function sendMessage_after_fn_logic_excute()
+	{
+		self.port.emit(c_msg_name_facebook_after_fn_logic_excute, true);
+	}
+	
+	self.port.on(c_msg_name_getEditors_action, function(url_spec) {
 
 		if( is_my_page(url_spec) )
 		{
 			WEB_CMM.log(" face book chat is_my_page")
 			add_FNToggle_editor_focus_listener();
 			//WEB_TEST.create_test_panel();
+			sendMessage_after_fn_logic_excute();
 		}
 
 	});
+	
+	self.port.on(c_msg_name_facebook_prompt_import_contacts, facebook_prompt_import_contacts );
          
 })(); // end of (function(){
 
