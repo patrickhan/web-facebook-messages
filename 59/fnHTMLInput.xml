@@ -1,0 +1,713 @@
+<?xml version="1.0"?>
+
+<!-- ***** comment beign *****
+	- comment :
+	- for replacing the password input field with fn secure single line textbox in html document only
+	- this xbl file is writen based on xbl version 2 
+	- version : 0.1
+	- author  : Patrick
+	- copyright: fn allright reserved
+	- introduced by html.css
+	- revision 1 : 2012/08/27 begin
+	-            Replacing the password input element has some side-effection : some page using js to check the passowed input element.
+	-            To handle these situation , we using fn secure box to cover the password input and set the password input as hidden.
+	-            The value of password input element will be set as a fraud one in the webpage 
+	-            The value of password input element will be change the real one in  fn protocol just before the http package is sent out.
+	- revision 1 : 2012/08/27 end
+  - ***** comment end ***** -->
+<!--
+<xbl:xbl
+ xmlns="http://www.w3.org/1999/xhtml"
+ xmlns:xbl="http://www.w3.org/ns/xbl">
+
+	<xbl:binding id="passwordinput">
+		<xbl:template>
+			<img src="http://192.168.5.25/images/WarningHS.png" alt="http://192.168.5.25/images/WarningHS.png"/>
+		</xbl:template>
+	</xbl:binding>  
+
+</xbl:xbl>         
+-->
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+		      xmlns:xbl="http://www.mozilla.org/xbl"
+          xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+>          
+
+    <binding id="passwordinput">
+        <resources>
+             <stylesheet src="chrome://global/content/fnInput.css"/>
+        </resources>
+        <content>
+        </content>
+        <implementation>
+        	<method name="init">
+        	  <body>
+				<![CDATA[                  
+				  this.watch = null;                  
+		          setTimeout(function (self) {               
+                    if(self.getAttribute("fnhasswitched") == null)
+                    {
+                        self.setAttribute("fnhasswitched", "false");                       
+		                self.replacePasswordInput();
+                    }
+		          }, 1, this);				                    
+        		]]></body>
+        	</method>
+			
+			<method name="setWatchInterval">
+				<body><![CDATA[
+					if(this.watch == null)
+					{
+						this.watch = setInterval(function(self) {
+						self.watchInputShow();
+						},500, this);
+					}
+				]]></body>
+			</method>	
+			
+			<method name="watchInputShow">
+			<body><![CDATA[
+				var srcElement = this;
+				var fnboxElement = srcElement.previousSibling;
+				var type = fnboxElement.type;
+				if(type == "application/fn-textbox-proxy")
+				{
+
+					var style = document.defaultView.getComputedStyle(srcElement, "");
+
+					if(style.width !="auto" && style.height !="auto" )
+					{
+						//this.copyStyleValues(srcElement, fnboxElement);
+						
+						fnboxElement.style.width = style.width;
+						fnboxElement.style.height = "22px";
+						fnboxElement.style.border = "#3b3b3b thin solid";
+						
+						fnboxElement.onCreated();
+						clearInterval(this.watch);
+						this.watch = null;
+					}								
+				}
+				else
+				{
+					clearInterval(this.watch);
+					this.watch = null;
+				}
+			]]></body>
+			</method>
+			
+ 	
+        	<method name="replacePasswordInput">
+        	  <body>
+                          <![CDATA[          
+                  if(document.domain.indexOf('ebuddy.com') >= 0)
+				  {
+				      return;
+				  }
+		          var srcElement = this;
+		          var fnbox = document.createElement("object");
+		          if(fnbox )
+		          {
+		          	
+		          	
+		          	fnbox.setAttribute("htmlinputsubstitute", "true" );
+		          	this.copyAttributes(srcElement, fnbox);
+
+		          	this.copyStyleValues(srcElement, fnbox);
+					
+					this.remove_css_transform(srcElement, fnbox);
+
+					//zise backup
+					fnbox.setAttribute("height_backup", "23px" );// for show up
+					fnbox.setAttribute("width_backup", fnbox.style.width  );// for show up
+																
+		           	fnbox.style.border = "#3b3b3b thin solid";
+		           	fnbox.style.height = "21px";		           	//hide firstly
+		           	fnbox.style.width  = "221px";		           	//hide firstly
+					fnbox.style.padding  = "0px";		         //no padding
+					fnbox.style.borderRadius  = "0px";		         //no padding
+
+		            fnbox.setAttribute("pwdDspMode", "true"   );
+        				fnbox.setAttribute("type", "application/fn-textbox-proxy" )
+        				if(typeof srcElement.value == "string")
+        				{
+        					//fnbox.value = srcElement.value; 
+        				}
+        				srcElement.parentNode.insertBefore(fnbox, srcElement);
+						fnbox.wrappedJSObject.input = srcElement;
+						srcElement.wrappedJSObject.fnbox = fnbox.wrappedJSObject;
+						
+        				//srcElement.parentNode.removeChild(srcElement); //remove the password input
+        				//srcElement.setAttribute("hidden", "true" ) //hide the password input
+        				
+        				//set a special value for some validation 
+        				//setTimeout(function (self,passwordElement, fnboxElement ) {
+		            //	self.setpasswordValue(passwordElement, fnboxElement);		            
+		          	//	}, 20, this,srcElement, fnbox);
+        				
+        			}
+
+        			fnbox.addEventListener("DOMAttrModified", function(evt){
+        				if(evt.attrName == "fnencrypedcotent" && this.getAttribute("FNEncrypedCotent") != null)
+        				{
+        					var event = document.createEvent("HTMLEvents");
+        					event.initEvent("fnTextBoxBlurEvt", true, false);
+        					this.dispatchEvent(event);
+        				}
+        			}, false);
+        			
+					fnbox.addEventListener("blur", function(evt){
+                        //var thetogglebackInput = this.nextSibling;        				    				    
+                        var thisobj = this;
+                        if(this.GetValueAsHtmlScript === undefined)
+                        {
+                          thisobj = this.wrappedJSObject;
+                        }
+    				    this.setAttribute("FNEncrypedCotent", thisobj.GetValueAsHtmlScript());
+        			},false);
+        			return fnbox;	        			
+		          
+
+        		]]></body>
+        	</method>
+        	
+        	<method name="setpasswordValue">
+        		<parameter name="passwordElement"/>
+        		<parameter name="fnboxElement"/>
+        		<body><![CDATA[
+        		var refValue = fnboxElement.refValue;
+        		if(refValue && passwordElement.hidden)
+        		{ 
+        			passwordElement.setAttribute("value", refValue );
+        			//passwordElement.value = refValue ;
+        		}
+        		fnboxElement.onCreated();
+        		]]></body>
+        	</method>
+        	
+        	<method name="copyAttributes">
+        		<parameter name="srcElement"/>
+        		<parameter name="destElement"/>
+        		<body><![CDATA[
+        		/// this function will copy the attributes from scrElement to destelement
+      			for(var i = 0; i <srcElement.attributes.length; i++ )
+      			{
+      				var attr = srcElement.attributes[i];
+      				if(attr.name == "id" || attr.name == "name" || attr.name == "style")
+      				{// style , we using computed style, so ignor atyle attribute
+      					continue;
+      				}
+      				destElement.setAttribute(attr.name, attr.value);
+      			}
+      			var idvalue  = destElement.getAttribute("id");
+      			if(idvalue)
+      			{
+      				if(idvalue == "fnwillswitchID")
+      				{
+      					destElement.setAttribute("id", "fnwillswitchIDsinglebox");
+      				}
+      				else if(idvalue.length > 0  )
+      				{
+      					destElement.setAttribute("id", "fn_" + idvalue);
+      				}
+      			}
+      			var namevalue  = destElement.getAttribute("name");
+      			if(namevalue)
+      			{
+      				if(namevalue.length > 0  )
+      				{
+      					destElement.setAttribute("name", "fn_" + namevalue);
+      				}
+      			}
+        		]]></body>
+        	</method>   
+			<method name="remove_css_transform">
+				<parameter name="srcElement"/>
+				<parameter name="destElement"/>
+				<body><![CDATA[
+				  try{	
+					let parentnd = srcElement;
+					
+					while(parentnd)//.nodeName != "HTML" )
+					{
+						if(parentnd == parentnd.parentElement)
+						{
+							break;
+						}
+						parentnd = parentnd.parentElement;
+						if(parentnd == null)
+						{
+							break;
+						}
+						var transformVal = parentnd.ownerDocument.defaultView.getComputedStyle(parentnd, "").transform;
+						if(transformVal && transformVal !="none")
+						{
+							parentnd.style.transform='none';
+						}
+					}
+					var interval ;
+					//window.addEventListener("message", listener_func, false);
+					srcElement.ownerDocument.defaultView.addEventListener("message", function(event){
+						if(event.data === "fn-box-help-received")
+						{
+							if(interval)
+							{
+							 srcElement.ownerDocument.defaultView.clearInterval(interval);
+							}
+						}
+					});
+					interval = srcElement.ownerDocument.defaultView.setInterval(
+						function(){
+						srcElement.ownerDocument.defaultView.postMessage("fn-box-help" , srcElement.ownerDocument.defaultView.location);
+						}, 100);
+				  }catch(e){alert("remove_css_transform: error : " + e)}
+        		]]>
+        		</body>
+        	</method>  			
+        	<method name="copyStyleValues">
+        	<parameter name="srcElement"/>
+        	<parameter name="destElement"/>
+        	<body><![CDATA[
+			        var aElem = srcElement;
+			        var newE1 = destElement
+
+			        var style1 = document.defaultView.getComputedStyle(aElem, "");
+			        var style2 = newE1.style;
+			        var style_attr= "";
+			        for(var i = 0; i < style1.length; i++)
+			        {
+						var pi = style1.item(i);
+						var vi = style1.getPropertyValue(pi);
+						////display: inline
+						if(pi == "display" && vi == "none") // there is no chance to show the plugin
+						{
+							this.setWatchInterval();
+							continue;
+						}
+						if(pi == "visibility" && vi == "hidden") // there is no chance to show the plugin
+						{
+							this.setWatchInterval();
+							continue;
+						}
+						if(pi.indexOf("-moz-") != -1 || vi.indexOf("-moz-") != -1)
+						{
+						    continue;
+						}
+						//transform
+						if(pi.indexOf("transform") != -1 || vi.indexOf("transform") != -1) //transform does not work with windowed plugin
+						{
+							continue;
+						}
+						//transform				
+						//animation
+						if(pi.indexOf("animation") != -1 || vi.indexOf("animation") != -1)
+						{
+							continue;
+						}
+						if(pi.indexOf("align") != -1 || vi.indexOf("align") != -1)
+						{
+						    continue;
+						}
+						if(pi.indexOf("padding") != -1 ) //padding we have special definition
+						{
+							continue;
+						}
+						style_attr += pi + ":" + vi +";"
+			        }
+			        var style1_1 = aElem.style;
+			
+			        for(var i = 0; i < style1_1.length; i++)
+			        {
+			            var pi = style1_1.item(i);
+			            var vi = style1_1.getPropertyValue(pi)
+						if(pi == "display" && vi == "none") // there is no chance to show the plugin
+						{
+							this.setWatchInterval();
+							continue;
+						}
+						if(pi == "visibility" && vi == "hidden") // there is no chance to show the plugin
+						{
+							this.setWatchInterval();
+							continue;
+						}
+						//if(pi.indexOf("-moz-") != -1 || vi.indexOf("-moz-") != -1)
+						//{
+						//    continue;
+						//}
+						//if(pi == "display" && vi == "inline")
+						//{
+						//    continue;
+						//}
+						if(pi.indexOf("padding") != -1 ) //padding we have special definition
+						{
+							continue;
+						}
+						style_attr += pi + ":" + vi +";"
+			        }
+			
+			        newE1.setAttribute("style" , style_attr );
+        		]]>
+        		</body>
+        	</method>        	
+            <constructor>
+            <![CDATA[                
+            	init();
+        		]]>
+        		</constructor>
+            <destructor></destructor>
+        </implementation>
+        <handlers>
+            <!--handler event="click" button="0" >
+            <![CDATA[
+        			// this is passwordinput element
+        			//document.getAnonymousNodes(this) is the children in content tag
+        			//document.getAnonymousNodes(this)[0] is the first child in content tag
+        			//document.getBindingParent(this)  is null >> is document.getBindingParent(this) for xul only? 
+        			var ahtmlpasswrodInput = event.target;
+        			alert("this: " + this);
+        			alert("this.parentNode : " + this.parentNode);
+        			alert("document.getBindingParent() : " + document.getBindingParent(this)  );
+        			alert("ahtmlpasswrodInput.aBindingParent : " + ahtmlpasswrodInput.aBindingParent);
+        			alert("ahtmlpasswrodInput.parentNode0 : " + ahtmlpasswrodInput.parentNode0);
+        			
+        			
+        			alert("ahtmlpasswrodInput.getAnonymousNodes : " + ahtmlpasswrodInput.getAnonymousNodes);
+        			alert("ahtmlpasswrodInput.getAnonymousNodes0 : " + ahtmlpasswrodInput.getAnonymousNodes0);
+        			
+        			//var ahtmlpasswrodInput.this_bound 
+        			//alert( "document: " + document.location )
+        			//var e1 = document.getBindingParent(this);
+        			//var e2 = document.getAnonymousNodes(this);
+        			//var e3 = document.getAnonymousNodes(this)[0];
+        			//alert( "e1: " + e1.tagName + "e2 :"+ e2.tagName + "e3 :"+ e3)
+      			]]>
+      			</handler -->
+        </handlers>
+    </binding>
+
+    <binding id="plaininput">
+        <resources>
+             <stylesheet src="chrome://global/content/fnInput.css"/>
+        </resources>
+        <content>
+        </content>
+        <implementation>
+        	<method name="init">
+        	  <body><![CDATA[
+		          setTimeout(function (self) {
+		            self.replacePlainInput();		            
+		          }, 0, this);
+        		]]></body>
+        	</method>
+        	
+        	<method name="replacePlainInput">
+        	  <body><![CDATA[
+		          
+		        if(document.location.protocol == "http:" || document.location.protocol == "file:")
+        	    {
+        	        return;
+        	    }
+				var srcElement = this;
+				var fnbox = document.createElement("object");
+				if(fnbox )
+				{
+		          	fnbox.setAttribute("htmlinputsubstitute", "true" );
+		          	this.copyAttributes(srcElement, fnbox);
+
+		          	this.copyStyleValues(srcElement, fnbox);
+
+
+					//zise backup
+					fnbox.setAttribute("height_backup", "23px" );// for show up
+					fnbox.setAttribute("width_backup", fnbox.style.width  );// for show up
+																
+		           	fnbox.style.border = "#3b3b3b thin solid";
+		           	fnbox.style.height = "1px";		           	//hide firstly
+		           	fnbox.style.width  = "1px";		           	//hide firstly
+					
+					this.remove_css_transform(srcElement, fnbox);
+		           	
+		            fnbox.setAttribute("pwdDspMode", "false"   );
+        				fnbox.setAttribute("type", "application/fn-textbox-proxy" )
+        				
+        				if(typeof srcElement.value == "string")
+        				{
+        					fnbox.value = srcElement.value; 
+        				}
+        				srcElement.parentNode.insertBefore(fnbox, srcElement);
+						fnbox.wrappedJSObject.input = srcElement;
+						srcElement.wrappedJSObject.fnbox = fnbox.wrappedJSObject;
+        				//srcElement.parentNode.removeChild(srcElement); //remove the password input
+        				//srcElement.setAttribute("hidden", "true" ); //hide the password input
+
+        				//set a special value for some validation 
+        				//setTimeout(function (self,inputElement, fnboxElement ) {
+		            //	self.setPlainInputValue(inputElement, fnboxElement);		            
+		          	//	}, 20, this,srcElement, fnbox);
+
+        			}
+        			fnbox.addEventListener("DOMAttrModified", function(evt){
+        				if(evt.attrName == "fnencrypedcotent" && this.getAttribute("FNEncrypedCotent") != null)
+        				{
+        					var event = document.createEvent("HTMLEvents");
+        					event.initEvent("fnTextBoxBlurEvt", true, false);
+        					this.dispatchEvent(event);
+        				}
+        			}, false);
+        			
+					fnbox.addEventListener("blur", function(evt){
+        				//var thetogglebackInput = this.nextSibling; 
+						var thisobj = this;
+                        if(this.GetValueAsHtmlScript === undefined)
+                        {
+                          thisobj = this.wrappedJSObject;
+                        }						
+    				    this.setAttribute("FNEncrypedCotent", thisobj.GetValueAsHtmlScript());
+        			},false);			
+        			return fnbox;
+		          
+
+        		]]></body>
+        	</method>
+        	
+        	<method name="setPlainInputValue">
+        		<parameter name="inputElement"/>
+        		<parameter name="fnboxElement"/>
+        		<body><![CDATA[
+        		var refValue = fnboxElement.refValue;
+        		if(refValue && inputElement.hidden)
+        		{
+        			inputElement.setAttribute("value", refValue )
+        			//inputElement.value = refValue ;
+        		}
+        		fnboxElement.onCreated();
+        		]]></body>
+        	</method>
+        	
+        	<method name="copyAttributes">
+        		<parameter name="srcElement"/>
+        		<parameter name="destElement"/>
+        		<body><![CDATA[
+        		/// this function will copy the attributes from scrElement to destelement
+        		if(document.body.mergeAttributes) //IE
+        		{
+        			destElement.mergeAttributes(srcElement, true);
+        		}
+        		else //firefox etc.
+        		{
+        			for(var i = 0; i <srcElement.attributes.length; i++ )
+        			{
+        				var attr = srcElement.attributes[i];
+        				if(attr.name == "id" || attr.name == "name"  || attr.name == "style")
+      					{// style , we using computed style, so ignor atyle attribute
+      						continue;
+      					}
+
+        				destElement.setAttribute(attr.name, attr.value);
+        			}
+        			// special  flag to notify the box is modified ny fnbox
+        			var idvalue  = destElement.getAttribute("id");
+	      			if(idvalue)
+	      			{
+	      				if(idvalue == "fnwillswitchID")
+	      				{
+	      					destElement.setAttribute("id", "fnwillswitchIDsinglebox");
+	      				}
+	      				else if(idvalue.length > 0  )
+	      				{
+	      					destElement.setAttribute("id", "fn_" + idvalue);
+	      				}
+	      			}
+	      			var namevalue  = destElement.getAttribute("name");
+	      			if(namevalue)
+	      			{
+	      				if(namevalue.length > 0  )
+	      				{
+	      					destElement.setAttribute("name", "fn_" + namevalue);
+	      				}
+	      			}
+        		}
+        		]]></body>
+        	</method>    
+
+		<method name="remove_css_transform">
+        	<parameter name="srcElement"/>
+        	<parameter name="destElement"/>
+        	<body><![CDATA[
+					let parentnd = srcElement;
+					
+					while(parentnd.nodeName != "HTML" )
+					{
+						if(parentnd == parentnd.parentElement)
+						{
+							break;
+						}
+						parentnd = parentnd.parentElement;
+						if(parentnd == null)
+						{
+							break;
+						}
+						
+						var transformVal = document.defaultView.getComputedStyle(parentnd, "").transform;
+						if(transformVal && transformVal !="none")
+						{
+							parentnd.style.transform='none';
+						}
+					}
+        		]]>
+        		</body>
+        	</method>  			
+        	<method name="copyStyleValues">
+        	<parameter name="srcElement"/>
+        	<parameter name="destElement"/>
+        	<body><![CDATA[
+			        var aElem = srcElement;
+			        var newE1 = destElement
+					
+			        var style1 = document.defaultView.getComputedStyle(aElem, "");
+			        var style2 = newE1.style;
+			        var style_attr= "";
+			        for(var i = 0; i < style1.length; i++)
+			        {
+			          var pi = style1.item(i);
+			          var vi = style1.getPropertyValue(pi);
+                if(pi.indexOf("padding") != -1 ) //padding we have special definition
+                {
+                    continue;
+                }
+				//transform
+				if(pi.indexOf("transform") != -1 || vi.indexOf("transform") != -1) //transform does not work with windowed plugin
+				{
+					continue;
+				}
+				//transform				
+				//animation
+				if(pi.indexOf("animation") != -1 || vi.indexOf("animation") != -1)
+				{
+					continue;
+				}
+				//animation
+                if(pi == "display" && vi == "none") // there is no chance to show the plugin
+                {
+                    continue;
+                }
+                if(pi == "visibility" && vi == "hidden") // there is no chance to show the plugin
+                {
+                    continue;
+                }
+                style_attr += pi + ":" + vi +";"
+			
+			        }
+			        var style1_1 = aElem.style;
+			
+			        for(var i = 0; i < style1_1.length; i++)
+			        {
+			            var pi = style1_1.item(i);
+			            var vi = style1_1.getPropertyValue(pi)
+	                if(pi.indexOf("padding") != -1 ) //padding we have special definition
+	                {
+	                    continue;
+	                }
+	                style_attr += pi + ":" + vi +";"
+			        }
+			
+			        newE1.setAttribute("style" , style_attr );
+        		]]>
+        		</body>
+        	</method>        	
+        	
+            <constructor>
+            <![CDATA[
+            	init();
+        		]]>
+        		</constructor>
+            <destructor></destructor>
+        </implementation>
+    </binding>
+
+ 		<binding id="fnbox_fnproxy_off">
+        <resources>
+             <stylesheet src="chrome://global/content/fnInput.css"/>
+        </resources>
+        <content>
+        </content>
+        <implementation>
+        	<method name="init">
+        	  <body><![CDATA[
+		          setTimeout(function (self) {
+		            self.showInput();		            
+		          }, 0, this);
+        		]]></body>
+        	</method>
+        	
+        	<method name="showInput">
+        	  <body><![CDATA[
+		          
+		          var fnbox = this;
+		          var fnbox = document.createElement("object");
+		          if(fnbox )
+		          {
+		           	fnbox.style.display = "none"
+		           	var nextEle =  fnbox.nexSibling;
+		           	if(nextEle.tagName == "input" )
+		           	{
+		           		nextEle.setAttribute("hidden", "false" ) ; //show the input
+		           	}
+        				
+        			}
+
+        		]]></body>
+        	</method>
+        	<constructor>
+            <![CDATA[
+            	init();
+        		]]>
+        	</constructor>
+          <destructor></destructor>
+       </implementation>
+    </binding>
+    
+    <binding id="fnbox_fnproxy_on">
+        <resources>
+             <stylesheet src="chrome://global/content/fnInput.css"/>
+        </resources>
+        <content>
+        </content>
+        <implementation>
+        	<method name="init">
+        	  <body><![CDATA[
+		          setTimeout(function (self) {
+		            self.hideInput();		            
+		          }, 0, this);
+        		]]></body>
+        	</method>
+        	
+        	<method name="hideInput">
+        	  <body><![CDATA[
+		          
+		          var fnbox = this;
+		          var fnbox = document.createElement("object");
+		          if(fnbox )
+		          {
+		           	fnbox.style.display = "block"
+		           	var nextEle =  fnbox.nexSibling;
+		           	if(nextEle.tagName == "input" )
+		           	{
+		           		nextEle.setAttribute("hidden", "true" ) ; //hide the input
+		           	}
+        				
+        			}
+
+        		]]></body>
+        	</method>
+        	<constructor>
+            <![CDATA[
+            	init();
+        		]]>
+        	</constructor>
+          <destructor></destructor>
+       </implementation>   
+    </binding>
+</bindings>

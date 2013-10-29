@@ -49,6 +49,13 @@
 	        "description": "persist the fn toggle options to an editable element",
 	        "type": "bool",
 	        "value": true
+	    },
+	    {
+	        "name": "fn-box-page-guard-enable",
+	        "title": "Help fn-box rendering in page : e.g. remove css:transform ",
+	        "description": " Help fn-box rendering in page : e.g. remove css:transform",
+	        "type": "bool",
+	        "value": true
 	    }
 	    
     ]
