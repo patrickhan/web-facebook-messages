@@ -15,7 +15,7 @@ var WEB_TEST = facebook_test_ns;//.create_test_panel =  create_test_panel;
 
     const g_facebook_chat_div_classname =  "fbNubFlyout fbDockChatTabFlyout";
 	const g_fn_toggle_init_event_name = "FnInputEleFocus";
-	const g_facebookchat_fndocid_prefix = "HJContentID:";
+	const g_facebookchat_fndocid_prefix = "fnfacebookchatid:";//"HJContentID:";
 	const g_APP_NAME = "facebook";
 	const c_msg_name_facebook_after_fn_logic_excute = "facebook_after_fn_logic_excute";//from page content,  tell the addon, facebook_after_fn_logic_excute
 	const c_msg_name_getEditors_action = "getEditors";// tell the page content js to get Editors interested
@@ -92,9 +92,17 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	
 	function triggerkeypress_enter(target)
 	{
-	    var keyEvt = document.createEvent("KeyboardEvent");
-        keyEvt.initKeyEvent("keypress", true, true, null, false, false, false, false, 13, 13);
-        target.dispatchEvent(keyEvt);       
+		var keyEvt1 = document.createEvent("KeyboardEvent");
+        keyEvt1.initKeyEvent("keydown", true, true, null, false, false, false, false, 13, 13);
+        target.dispatchEvent(keyEvt1);   
+		
+	    var keyEvt2 = document.createEvent("KeyboardEvent");
+        keyEvt2.initKeyEvent("keypress", true, true, null, false, false, false, false, 13, 13);
+        target.dispatchEvent(keyEvt2);      
+
+		var keyEvt3 = document.createEvent("KeyboardEvent");
+        keyEvt3.initKeyEvent("keyup", true, true, null, false, false, false, false, 13, 13);
+        target.dispatchEvent(keyEvt3);       		
 	}
 	
 	function jquery_triggerkeypress_enter(input$)
@@ -145,7 +153,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 					args : "",
 					finish: function(ret, doc) {
 
-						
+						WEB_CMM.log("start send message...into callback function finish...........");
 						var docids = JSON.parse(ret);
 						var msgContent = "";
 						for(var id in docids) {
@@ -153,16 +161,18 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 							msgContent += docids[id];
 							msgContent += "\n";
 						}
-						var self = doc.defaultView.wrappedJSObject;
-						var eleInput = $(afacebookchatTag).find("textarea");
+						//var self = doc.defaultView.wrappedJSObject;
+						var eleInput$ = $(afacebookchatTag).find("textarea");
 
 						//put message to input textarea, and send it by pressing enter
-						if(eleInput && eleInput.length > 0)	{
-							eleInput.val(msgContent);
-							setTimeout(function(target, doc) {
-								var keyEvt = doc.createEvent("KeyboardEvent");
-								keyEvt.initKeyEvent("keypress", true, true, null, false, false, false, false, 13, 13);
-								target.dispatchEvent(keyEvt);}, 0, eleInput[0], doc);
+						if(eleInput$ && eleInput$.length > 0)	{
+							eleInput$.val(msgContent);
+							setTimeout(function(target$) {
+									//target$[0].focus();
+									//target$[0].click();
+									
+									triggerkeypress_enter(target$[0]);
+								}, 0, eleInput$, doc);
 							       
 						}
 
@@ -214,15 +224,15 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	function fillRecipientsTo_fnrecipients(the_A_Node, facebookchattag)
 	{
 	    var target = facebookchattag;
+		target.m_fnrecipients = [];//clear
 	    if(the_A_Node.getAttribute("aria-label") == null)
-        {   
+        {   //if the tooltip has fill the "aria-label" then just get them
             target.m_fnrecipients.push(the_A_Node.innerHTML);
             WEB_CMM.log(" fillRecipientsTo_fnrecipients: m_fnrecipients :  " + target.m_fnrecipients );
             return;
         }
         else
-        {	 
-            
+        {	 // simulate the 'mouse over' and then read the tooltip value 
             setTimeout(function(){
                 var funobj = null;
                 document.body.addEventListener("DOMNodeInserted", funobj = function(evt){	                                        
@@ -269,8 +279,9 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	}*/
 	
 	function get_FacebookChat_Recipients(facebookchattag)
-	{
-		return facebookchattag.m_fnrecipients;
+	{//use   jQuery.unique( array ) to remove the duplicate objs if needed
+			
+		return facebookchattag.m_fnrecipients;// = jQuery.unique( facebookchattag.m_fnrecipients );
 	}
 	
 	
@@ -766,6 +777,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 /* Date: Sep.1 2013
 {"imtype":"facebook","msgheader":"passDataToRTE","sender":"fntest001","receiver":["fntest002-name"],"datetime":"4:06:38PM","message":"fc77b3a0-5fbd-4b7b-8a37-27409deed84d"}
 /************************************************************************/
+// to be able to send out the message, facebook handle shoule be in FN Contacts, -- do facebook contact import!!
 		WEB_CMM.log("start send message..............");
 		
 		var msgObj = window.wrappedJSObject.MessageProcessor;
@@ -885,7 +897,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	{
 		add_clean_fn_chatTag_listener(input, chatTag);
 		var afnchatTag$ = get_fnchatTag_in_facebookchatTag(chatTag);
-		if(!afnchatTag$ || !afnchatTag$.length)
+		if(!afnchatTag$ || !afnchatTag$.length)// not have it
 		{
 			WEB_CMM.log(" create_fn_chatTag: " + chatTag );
 			afnchatTag$ = $(g_fn_html_chat_tag_str).appendTo(chatTag);
@@ -924,6 +936,18 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 			afn_chatTag$.css("height","1px");
 		}
 	}
+	function fn_chatTag_is_shown(afn_chatTag$)
+	{
+		var shown =  false;
+		if(afn_chatTag$ && afn_chatTag$.length > 0 )
+		{
+			if(afn_chatTag$.css("width") != "1px")
+			{
+				shown =  true;
+			}
+		}
+		return shown;
+	}
 	
 	function firstTimedump_converstationContent(chatTag)
 	{
@@ -940,13 +964,20 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		}
 		
 		try
-		{
-		  var afn_chatTag$ = create_fn_chatTag(input, chatTag);
-		  if(afn_chatTag$.length > 0){
-			  access_FacebookChat_Recipients(chatTag);
-			  show_fn_chatTag(afn_chatTag$, show);
-			  firstTimedump_converstationContent(chatTag);
-		  }
+		{//if fnchattag is show and param:show=true do nothing
+			var afn_chatTag$ = get_fnchatTag_in_facebookchatTag(chatTag)
+			var shown = fn_chatTag_is_shown(afn_chatTag$);
+			if(shown)
+			{
+				return;
+			}
+			//show , if there is not a fnchattag, create one
+			afn_chatTag$ = create_fn_chatTag(input, chatTag);
+			if(afn_chatTag$ && afn_chatTag$.length > 0){
+				access_FacebookChat_Recipients(chatTag);
+				show_fn_chatTag(afn_chatTag$, show);
+				firstTimedump_converstationContent(chatTag);
+			}
 		}
 		catch(ee)
 		{

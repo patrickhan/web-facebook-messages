@@ -182,7 +182,6 @@ function log(msg)
 {
 	WEB_CMM.log( msg  );
 }
-}
 // we use waitforelementpresent to detect the gmail composer, so it has no need to addeventlistener for the page modification
 })();
 

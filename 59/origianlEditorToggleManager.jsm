@@ -10,6 +10,8 @@
 
 
 var using_OETManager_debug = true; // = false when release
+var using_OETManager_debug_log = true; // = false when do alert
+
 //
 
 
@@ -141,10 +143,13 @@ let OETController_ExtendedProp = {
 		{
 			eventHolder.addEventListener("DOMAttrModified", this.onToggleCommandChecked, false);
 		}
+		
+		alert_log__("addTogleListener")
 	},
 	
 	removeTogleListener : function ()
 	{
+		alert_log__("removeTogleListener ")
 		let eventHolder = this.originalEditor;
 		let is_fn_integrating =  false;
 		if(g_OETManager.is_fn_integrating_Editor( eventHolder ) )
@@ -169,6 +174,7 @@ let OETController_ExtendedProp = {
 	
 	fnpresent: function()
 	{
+		alert_log__("fnpresent ");
 		let is_fn_integrating =  false;
 		if(g_OETManager.is_fn_integrating_Editor( this.originalEditor ) )
 		{
@@ -210,33 +216,34 @@ let OETController_ExtendedProp = {
 	
 	originalPresent : function()
 	{
-			let is_fn_integrating =  false;
-			if(g_OETManager.is_fn_integrating_Editor( this.originalEditor ) )
-			{
-				is_fn_integrating =  true;
+		alert_log__("originalPresent ");
+		let is_fn_integrating =  false;
+		if(g_OETManager.is_fn_integrating_Editor( this.originalEditor ) )
+		{
+			is_fn_integrating =  true;
+		}
+		
+		if(!is_fn_integrating)
+		{
+			if(this.originalEditor.currentReaders === undefined)
+			{// "select readers" will popup first time , so do nothing when the option is "SetReader" , wait the ser reader action
+				//return ;
 			}
-			
-			if(!is_fn_integrating)
+		}
+		if(this.lastEncryptActionTime)
+		{
+			let newTime = new Date();;
+			let timespan =  newTime.getTime() - this.lastEncryptActionTime.getTime();
+			if(timespan)
 			{
-				if(this.originalEditor.currentReaders === undefined)
-				{// "select readers" will popup first time , so do nothing when the option is "SetReader" , wait the ser reader action
-					//return ;
-				}
-			}
-			if(this.lastEncryptActionTime)
-			{
-				let newTime = new Date();;
-				let timespan =  newTime.getTime() - this.lastEncryptActionTime.getTime();
-				if(timespan)
+				if(timespan < 1000)
 				{
-					if(timespan < 1000)
-					{
-						return;
-					}
+					return;
 				}
 			}
-				
-			this.try_decrypt();
+		}
+			
+		this.try_decrypt();
 	},
 	
 	remove_handler : function()
@@ -304,6 +311,7 @@ let OETController_ExtendedProp = {
 	
 	try_encrypt:function()
 	{ 
+		alert_log__("try_encrypt ");
 		var aBrowserXULDOMWindow = getATopBrowserXulwindow();
 		if(!aBrowserXULDOMWindow )
 		{
@@ -406,6 +414,7 @@ let OETController_ExtendedProp = {
 							sendInvitation = true;
 						}
 					}
+					alert_log__("setEditorContent successFndocids: " +  successFndocids);				
 					g_OETManager.setEditorContent(editor, successFndocids, true, false); //paste the fndocid to the Editor
 				}
 				self.lastEncryptActionTime = new Date();
@@ -419,7 +428,9 @@ let OETController_ExtendedProp = {
 			if(is_fn_integrating )
 			{
 				//to not relase what the user typed, clean the content
-				// this is only a temperory solution, think about what if the encyption error and upload error..., user will lose what he typed!! 
+				// this is only a temperory solution, think about what if the encyption error and upload error..., user will lose what he typed!!
+
+				alert_log__("setEditorContent_inner_  empty editor ");				
 				g_OETManager.setEditorContent_inner_(editor ,"", false, false, false);
 			}
 			
@@ -547,6 +558,7 @@ let OETController_ExtendedProp = {
 	 
 	sendoutData : function (evt)
 	{
+		alert_log__("sendoutData")
 		if(!g_OETManager.is_fn_integrating_Editor( this.originalEditor) )
 		{
 		    return ;
@@ -565,13 +577,14 @@ let OETController_ExtendedProp = {
 			let self = this;
 			this.originalEditor.ownerDocument.defaultView.setTimeout( function()
 				{	
+					alert_log__( " will call addFnDocid in a timeout 100 : " + self.fncipher_cache);
 					if(self.fncipher_cache.length > 0)
 					{
-					let data = const_fndocidprefix + self.fncipher_cache;
-					
-					let aFnDocid_type_obj = {biztype: 0 , fndocid :self.fncipher_cache, pkey: self.fncipher_key}; // biztyp: 0  : mean : the fndoic is text 
-					addFnDocid(self.originalEditor.ownerDocument, aFnDocid_type_obj);
-					self.fncipher_cache = "";//discards the cache
+						let data = const_fndocidprefix + self.fncipher_cache;
+						
+						let aFnDocid_type_obj = {biztype: 0 , fndocid :self.fncipher_cache, pkey: self.fncipher_key}; // biztyp: 0  : mean : the fndoic is text 
+						addFnDocid(self.originalEditor.ownerDocument, aFnDocid_type_obj);
+						self.fncipher_cache = "";//discards the cache
 					}
 				},100);;
 			
@@ -914,13 +927,14 @@ OETManager.prototype = {
 				{
 					var FNJSAPICaller = Components.classes["@FNTechnologies.com/Mozilla/FNWebSvrJSHelper;1"].
 									createInstance(Components.interfaces.IFNWebSvrJSHelper);
-				
+					alert_log__("Components.interfaces.IFNWebSvrJSHelper")
 					FNJSAPICaller.sendInvitation(untrustedEmails, 
 						//this is a async function
-						function(data_ivi ){
+						{call_withString: function(data_ivi ){
+						alert_log__("Components.interfaces.IFNWebSvrJSHelper call  back")
 							content = data_ivi;
 							g_OETManager.setEditorContent_inner_(editor , content, usingHTML, true, false); // need append, nedd a stroke?
-						} );
+						} });
 				}
 			}
 		 }
@@ -929,6 +943,9 @@ OETManager.prototype = {
 	{
 		content =  "HJContentID:"+content;
 		//shouldSendInvitation is set before call this function 
+		
+		alert_log__("setEditorContent editor.shouldSendInvitation: " +  editor.shouldSendInvitation);				
+		
 		if(editor.shouldSendInvitation !== undefined)	
 		{
 			if(editor.shouldSendInvitation == true)
@@ -956,16 +973,18 @@ OETManager.prototype = {
 						untrustedEmails += key
 					}
 				}//for
+				alert_log__("setEditorContent editor.shouldSendInvitation untrustedEmails :  " +  untrustedEmails.toString() );	
 				if(untrustedEmails.length > 0)
 				{
 					var FNJSAPICaller = Components.classes["@FNTechnologies.com/Mozilla/FNWebSvrJSHelper;1"].
 									createInstance(Components.interfaces.IFNWebSvrJSHelper);
 					FNJSAPICaller.sendInvitation(untrustedEmails, 
 					//this is a async function
-					function(data_ivi ){
+					{call_withString:function(data_ivi ){
 						content += "\n" + data_ivi;
+						alert_log__("setEditorContent editor.shouldSendInvitation FNJSAPICaller.sendInvitation callback  data_ivi : " +  data_ivi);
 						g_OETManager.setEditorContent_inner_(editor , content, usingHTML, append, false);
-					} );
+					}} );
 				 }
 			
 			}//try
@@ -1062,7 +1081,11 @@ function alert_log__( whattosay )
 {
 	if(!using_OETManager_debug )
 		return ;
-		
+	if(using_OETManager_debug_log)
+	{
+		gconsole.logStringMessage( " ---- " + whattosay)
+		return ;
+	}	
 	var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
 	         getService(Components.interfaces.nsIWindowWatcher);
 	
