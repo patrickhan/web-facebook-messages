@@ -85,6 +85,10 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
             evt.initMouseEvent("mouseup", true, true, window,
                       0, 0, 0, 0, 0, false, false, false, false, 0, null);
                     box_obj.dispatchEvent(evt);
+			var evt2 = document.createEvent("MouseEvents");
+            evt2.initMouseEvent("click", true, true, window,
+                      0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            box_obj.dispatchEvent(evt2);
         }, timeout);
     }
     
@@ -104,7 +108,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
         $(editor).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));              
         var event = document.createEvent("HTMLEvents");        
         event.initEvent("fnRemoteHtmlReq-event", true, false);            
-        editor.dispatchEvent(event)   
+        editor.dispatchEvent(event); 
         
     }
     
@@ -142,11 +146,53 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
         document.body.dispatchEvent(event);
     }
     
-    function onAfter_preSending_event(callback)
+    
+    /*function common_routing_on_After_preSending_event(evt)
     {
-        document.body.addEventListener("DOMAttrModified", callback, false);   
+    	 try
+    	    {
+    	        if(evt.attrName == "fnremotehtmlreq-event-param"  )
+    	        {
+    	            if(evt.newValue=="true" || evt.newValue == "false")
+    	            {	
+    	                document.body.removeEventListener("DOMAttrModified",on_fnaction_over, false);
+    	                $(document.body).removeAttr("fnremotehtmlreq-event-param");
+    	                message_editor_group.tobox.removeAttr("fnremotehtmlreq-event-param");   
+    	                message_editor_group.editor.removeAttr("fnremotehtmlreq-event-param");   
+    	                if (evt.newValue=="true") {
+    	                    //should add invitation . when it comes, it is from CIA mode only
+    	                    var untrustedEmails =  $(document.body).attr("fnremotehtmlreq-event-param-subvalue");
+    	                    $(document.body).removeAttr("fnremotehtmlreq-event-param-subvalue");
+    	                    if (untrustedEmails.length > 0) {
+    	                        WEB_CMM.onprepare_send_invitation(message_editor_group.editor.get(0), untrustedEmails);
+    	                    }
+    	                }
+    	                //click the button again
+    	                call_simulate_mouse_click_jquery(  message_editor_group.sendbox, 1000);
+    			//WEB_CMM.call_simulate_mouse_click(  message_editor_group.sendbox.get(0), 1000);
+    	            }
+    	        }
+    	    }
+    	    catch(err)
+    	    {
+    	        //alert(err)
+    	    }
+    }*/
+    
+    function onAfter_preSending_event(callback)//should be rename as listen_After_preSending_event
+    {
+        document.body.addEventListener("DOMAttrModified", callback, false);  	
     }
     
+    function listen_After_preSending_event(callback$, attached_data)//callback$ is for jquery 
+    { 
+		$(document.body).on("DOMAttrModified",  attached_data, callback$);	
+    }
+	function unlisten_After_preSending_event(callback$)
+    {
+		$(document.body).off("DOMAttrModified", callback$);	
+		$(document.body).removeAttr("fnremotehtmlreq-event-param");		
+    }
     function onprepare_send_invitation(editor, untrustedEmails)
     {
         var transobj = {funname:"AppenddInvitation_ForWebPage", param:untrustedEmails};    	        
@@ -167,7 +213,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
 		catch(err)
         {
 			log("excpetion : util_clean_fndocid_from_fnrte : " + err  );
-        }	
+        }
 	}
 	
 	function fnrte_util_get_fndocid(afnrte)
@@ -206,9 +252,44 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
 		log("util_get_fndocid_from_fnrte is :  " + fndocid  );		
 		return fndocid;
     }	
-
+	function markEditor_fnIntegrated_flag(editors)
+	{
+		editors.wrappedJSObject.fnhookedFlag = true; ////unsafe 
+	}
+	
+	function removeEditor_fnIntegrated_flag(editors)
+	{
+		delete editors.wrappedJSObject.fnhookedFlag ; ////unsafe 
+	}
+	
+	Array.prototype.getUnique = function(){
+		var u = {}, a = [];
+		for(var i = 0, l = this.length; i < l; ++i){
+		  if(u.hasOwnProperty(this[i])) {
+			 continue;
+		  }
+		  a.push(this[i]);
+		  u[this[i]] = 1;
+		}
+		return a;
+	}
     //export
     //functions
+	function Array_getUnique(array_in)
+	{
+		var u = {}, a = [];
+		for(var i = 0, l = array_in.length; i < l; ++i){
+		  if(u.hasOwnProperty(array_in[i])) {
+			 continue;
+		  }
+		  a.push(array_in[i]);
+		  u[array_in[i]] = 1;
+		}
+		return a;
+		
+	}
+	
+	ns.Array_getUnique = Array_getUnique;
     ns.HJContentIDRegEx = HJContentIDRegEx;
     ns.emailAddrRegEx = emailAddrRegEx;
     ns.nolog = false;
@@ -223,8 +304,14 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     ns.fill_recepients = fill_recepients;
     ns.tell_editor = tell_editor;
     ns.trigger_preSending = trigger_preSending;
-    ns.onAfter_preSending_event = onAfter_preSending_event;
+    ns.onAfter_preSending_event = onAfter_preSending_event;//use listen_After_preSending_event instead
+    ns.listen_After_preSending_event = listen_After_preSending_event;
+	ns.unlisten_After_preSending_event = unlisten_After_preSending_event;
     ns.onprepare_send_invitation = onprepare_send_invitation;
+	
+    
+    ns.markEditor_fnIntegrated_flag = markEditor_fnIntegrated_flag;
+	ns.removeEditor_fnIntegrated_flag = removeEditor_fnIntegrated_flag;
 	
 	//fntre
 	ns.fnrte_util_clean_content = fnrte_util_clean_content;

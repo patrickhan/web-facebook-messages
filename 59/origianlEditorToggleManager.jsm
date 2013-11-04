@@ -922,7 +922,7 @@ OETManager.prototype = {
 		}
 		if(untrustedEmails.length > 0)
 		{
-			if(!g_OETManager.is_fn_integrating_Editor(editor ) )
+			//if(!g_OETManager.is_fn_integrating_Editor(editor ) )
 			{
 				{
 					var FNJSAPICaller = Components.classes["@FNTechnologies.com/Mozilla/FNWebSvrJSHelper;1"].
@@ -931,9 +931,9 @@ OETManager.prototype = {
 					FNJSAPICaller.sendInvitation(untrustedEmails, 
 						//this is a async function
 						{call_withString: function(data_ivi ){
-						alert_log__("Components.interfaces.IFNWebSvrJSHelper call  back")
+						alert_log__("Components.interfaces.IFNWebSvrJSHelper call  back ,param:" + data_ivi)
 							content = data_ivi;
-							g_OETManager.setEditorContent_inner_(editor , content, usingHTML, true, false); // need append, nedd a stroke?
+							g_OETManager.setEditorContent_inner_(editor , content, usingHTML, true, false); // need append, need a stroke?
 						} });
 				}
 			}
@@ -1061,15 +1061,15 @@ OETManager.prototype = {
 				editor.innerHTML = content
 			}
 		}
-		else
+		else if(usingHTML === undefined)
 		{// not been tested
 			if(append)
 			{
-				editor.ContentText += content;
+				editor.innerHTML += content
 			}
 			else
 			{
-				editor.ContentText = content;
+				editor.innerHTML = content
 			}
 		}
 	}
