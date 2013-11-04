@@ -58,7 +58,7 @@ function collect_wall_share_composer(editor) {
 
 function handle_wall_share_composer(acomposer)
 {
-WEB_CMM.log("handle_wall_share_composer  in " + acomposer.outerHTML);
+//WEB_CMM.log("handle_wall_share_composer  in " + acomposer.outerHTML);
 	if(!acomposer)
 	{
 		return;
@@ -73,9 +73,9 @@ WEB_CMM.log("handle_wall_share_composer  in " + acomposer.outerHTML);
 	var uniqID = WEB_CMM.uniqID(10);
 	var a_wall_editor_group =  new Wall_editor_group(acomposer, sendbox, tobox, uniqID);
 	g_wall_editor_groups[uniqID] = a_wall_editor_group;
-	WEB_CMM.log("handle_wall_share_composer  uniqID: " + uniqID);
-	WEB_CMM.log("handle_wall_share_composer  sendbox: " + sendbox);
-	WEB_CMM.log("handle_wall_share_composer  tobox: " + tobox);
+	//WEB_CMM.log("handle_wall_share_composer  uniqID: " + uniqID);
+	//WEB_CMM.log("handle_wall_share_composer  sendbox: " + sendbox);
+	//WEB_CMM.log("handle_wall_share_composer  tobox: " + tobox);
 	hookSendButton(sendbox);
 	hookEditorToggleOption(acomposer);
 	markEditor_fnIntegrated(acomposer);
@@ -113,6 +113,8 @@ function release_wall_share_composer(acomposer)
 	delete acomposer.handled_in_fn_wall;
 	delete acomposer.wall_editor_group_id;
 	delete g_wall_editor_groups[uniqID];
+	
+	WEB_CMM.log("release_wall_share_composer end");
 }
 
 //main logic ]
@@ -134,7 +136,7 @@ function sending_msg_routing(uniqID)
 	{
 		return ;
 	}
-    WEB_CMM.log("sending_msg_routing")
+    WEB_CMM.log("sending_msg_routing");
     try{
         WEB_CMM.tell_to_box(a_wall_editor_group.tobox);
         
@@ -155,11 +157,11 @@ function on_fnaction_over(evt$)	//I use jquery , uniqID is evt.data.editor_gourp
 {
     try
     {
-	var evt =  evt$.originalEvent;
+    	var evt =  evt$.originalEvent;
         if(evt.attrName == "fnremotehtmlreq-event-param"  )
-        {WEB_CMM.log("on_fnaction_over:  : 1" )
+        { 
             if(evt.newValue=="true" || evt.newValue == "false")
-            {	WEB_CMM.log("on_fnaction_over:  : 2" )
+            {	 
 				var uniqID = evt$.data.editor_gourp_id;
 				WEB_CMM.unlisten_After_preSending_event(on_fnaction_over);
                 //[
@@ -182,7 +184,7 @@ function on_fnaction_over(evt$)	//I use jquery , uniqID is evt.data.editor_gourp
                     $(document.body).removeAttr("fnremotehtmlreq-event-param-subvalue");
                     if (untrustedEmails.length > 0) {
                         WEB_CMM.onprepare_send_invitation(a_wall_editor_group.editor, untrustedEmails);
-						WEB_CMM.log("on_fnaction_over:  onprepare_send_invitation  :\n " + untrustedEmails )
+						//WEB_CMM.log("on_fnaction_over:  onprepare_send_invitation  :\n " + untrustedEmails )
                     }
                 }
                 //click the button again
@@ -212,11 +214,11 @@ function on_sendbox_click(evt)
 		//WEB_CMM.log("on_sendbox_click evt.target.wall_editor_group_id " +evt.target.wall_editor_group_id)
         var a_wall_editor_group = g_wall_editor_groups[uniqID];	
 		//WEB_CMM.log("on_sendbox_click evt.target.a_wall_editor_group.editor " +a_wall_editor_group.editor)
-	    var fn_toggle_option = $(a_wall_editor_group.editor).attr('fn-toggle-option');
-	    if (!fn_toggle_option ) {
-			WEB_CMM.log("on_sendbox_click !fn_toggle_option return" );
-	        return;
-	    }
+	    //var fn_toggle_option = $(a_wall_editor_group.editor).attr('fn-toggle-option');
+	    //if (!fn_toggle_option ) {
+		//	//WEB_CMM.log("on_sendbox_click !fn_toggle_option return" );
+	    //    return;
+	    //}
 	    if(!evt.target.hj_cocntrol || evt.target.hj_cocntrol == 0)
 	    {
 	        evt.target.hj_cocntrol = 1;// we hook and invoke this event later on;
@@ -248,9 +250,31 @@ function call_simulate_mouse_click_jquery( box_obj$, timeout)
 
 function hookEditorToggleOption(acomposer)
 {
+	if(acomposer)
+	{
+		$(acomposer).on("DOMAttrModified",  {editor_gourp_id:acomposer.wall_editor_group_id}, on_fn_toggle_option_changed);
+	}
 }
 function unhookEditorToggleOption(acomposer)
 {
+	$(acomposer).off("DOMAttrModified",   on_fn_toggle_option_changed);
+}
+
+function on_fn_toggle_option_changed(evt$)
+{
+	var evt =  evt$.originalEvent;
+	var target  =  evt.target;
+	if(evt.attrName == "fn-toggle-option"  )
+    {
+    	//WEB_CMM.log("on_fn_toggle_option_changed:  fn-toggle-option newValue is : "  + evt.newValue);
+    	//WEB_CMM.log("on_fn_toggle_option_changed:  fn-toggle-option event.prevValue is : "  + evt.prevValue);
+    	//if(evt.prevValue === "FNRTE" && evt.newValue !=="FNRTE" )
+		if(!evt.newValue)
+		{
+			//setTimeout(release_wall_share_composer, 0, target);
+			release_wall_share_composer(target);
+		}
+    }
 }
 //
 //////////////send box part[
