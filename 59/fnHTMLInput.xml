@@ -129,8 +129,8 @@
 					fnbox.setAttribute("width_backup", fnbox.style.width  );// for show up
 																
 		           	fnbox.style.border = "#3b3b3b thin solid";
-		           	fnbox.style.height = "21px";		           	//hide firstly
-		           	fnbox.style.width  = "221px";		           	//hide firstly
+		           	fnbox.style.height = "1px";		           	//hide firstly
+		           	fnbox.style.width  = "1px";		           	//hide firstly
 					fnbox.style.padding  = "0px";		         //no padding
 					fnbox.style.borderRadius  = "0px";		         //no padding
 
