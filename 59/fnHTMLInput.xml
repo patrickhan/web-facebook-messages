@@ -37,7 +37,7 @@
 
     <binding id="passwordinput">
         <resources>
-             <stylesheet src="chrome://global/content/fnInput.css"/>
+             <stylesheet src="fnInput.css"/>
         </resources>
         <content>
         </content>
@@ -101,8 +101,13 @@
  	
         	<method name="replacePasswordInput">
         	  <body>
-                          <![CDATA[          
-                  if(document.domain.indexOf('ebuddy.com') >= 0)
+                <![CDATA[          
+                  
+				  if(location.protocol != "https:" )//|| document.domain=="ebuddy.com" || document.domain=="live.com")
+                  {
+                      return;
+                  }
+				  if(document.domain.indexOf('ebuddy.com') >= 0)
 				  {
 				      return;
 				  }
