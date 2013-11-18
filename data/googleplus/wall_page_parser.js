@@ -15,8 +15,15 @@ const selector_googleplus_wall_share_group = "div[guidedhelpid='sharebox']:visib
 const selector_googleplus_wall_share_group_editor_parent = "div[guidedhelpid='sharebox_editor']:visible"  ;
 
 const selector_googleplus_wall_share_group_editor = "div[contenteditable='true'][g_editable='true'][role='textbox']:visible";
+
+
 const selector_googleplus_wall_share_group_sendbox = "div[guidedhelpid='sharebutton']:visible";
 const selector_googleplus_wall_share_group_tobox = "div[guidedhelpid='sharebox_chips_div']:visible";
+//reply
+const selector_googleplus_wall_reply_group_editor = selector_googleplus_wall_share_group_editor;
+const selector_googleplus_wall_reply_group_parent = "div[role='textbox']:visible";
+const selector_googleplus_wall_reply_group_reply  = "div[role='button']:visible:contains('Post comment')";
+
 	/*
 group:
 div: "guidedhelpid" ="sharebox"
@@ -31,14 +38,11 @@ sendbox:
 div guidedhelpid = shareboxcontrols > guidedhelpid=sharebutton :text=share
 */
 
+
 	function is_wall_share_editor(editor)
 	{
-		var theeditor$ = $(editor).is(selector_googleplus_wall_share_group_editor);
-		if(!theeditor$)
-		{
-			return false;
-		}
-		if(!theeditor$.length == 0)
+		var is_theeditor = $(editor).is(selector_googleplus_wall_share_group_editor);
+		if(!is_theeditor)
 		{
 			return false;
 		}
@@ -101,10 +105,67 @@ div guidedhelpid = shareboxcontrols > guidedhelpid=sharebutton :text=share
 	{
 		return ashare_group$.find(selector_googleplus_wall_share_group_tobox);
 	}
-		
+	
+	// reply
+	function is_wall_reply_editor(editor)
+	{
+		var is_theeditor = $(editor).is(selector_googleplus_wall_share_group_editor);
+		if(!is_theeditor)
+		{
+			return false;
+		}
+		var theeditor$ = $(editor);
+		var areply_group$  = theeditor$.closest(selector_googleplus_wall_reply_group_parent);
+		if(areply_group$ && areply_group$.length > 0)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	function findReplyButton_from_composer(editor)
+	{
+		var theeditor$ = $(editor);
+		var areply_group$  = theeditor$.closest(selector_googleplus_wall_reply_group_parent);
+		if(areply_group$ && areply_group$.length > 0)
+		{
+			var reply_button$ = areply_group$.find(selector_googleplus_wall_reply_group_reply);
+			return reply_button$;
+		}
+		return null;
+	}
+	function get_Reply_latest_HJContentID(editor)
+	{
+		var theeditor$ = $(editor);
+		var areply_group$  = theeditor$.closest(selector_googleplus_wall_reply_group_parent);
+		if(areply_group$ && areply_group$.length > 0)
+		{
+			var content  = areply_group$.contents().find("div").text();
+			log( "$(acomposer).contents() :  + "  +   content );
+			var results = content.match( WEB_CMM.HJContentIDRegEx );
+			if(results)
+			{
+				var docid = results[0];
+				docid =  docid.substring( docid.indexOf(":") + 1 );// remove the prefix 
+				
+				log( "get_latest_HJContentID :  + "  +   docid );
+				return docid;
+			}
+		}
+		return null;
+	}
+	function log(msg)
+	{
+		WEB_CMM.log( msg  );
+	}	
 	ns.is_wall_share_editor = is_wall_share_editor;
 	ns.get_sendbox =  get_sendbox;
 	ns.get_tobox = get_tobox;
+	
+	//reply
+	ns.is_wall_reply_editor = is_wall_reply_editor;
+	ns.findReplyButton_from_composer = findReplyButton_from_composer
+	ns.get_Reply_latest_HJContentID = get_Reply_latest_HJContentID
 
          
 })(fn_webpage_parser_googleplus_wall_ns); // end of (function(){

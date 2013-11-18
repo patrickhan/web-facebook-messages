@@ -18,7 +18,7 @@ var TOGGLE_OPT_PERSIST = fn_web_common_persist_fn_toggle_option_ns;
 var PAGE_PARSER = fn_webpage_parser_googleplus_wall_ns;
 
 //const 
-const g_interesting_webpage_url_rule = "^https:\/\/plus.google.com\/u\/0\/*";
+const g_interesting_webpage_url_rule = "^https:\/\/plus.google.com\/.*";//"^https:\/\/plus.google.com\/u\/0\/*";
 const g_interesting_webpage_reg_ex  = new RegExp(g_interesting_webpage_url_rule) ;
 
 const c_msg_name_get_composer = "get-googleplus_share-composer";
@@ -47,15 +47,77 @@ function collect_wall_share_composer(editor) {
 	}
 
     var is_wall_share = PAGE_PARSER.is_wall_share_editor(editor);
-    if(!is_wall_share)
+	
+	var is_wall_reply = PAGE_PARSER.is_wall_reply_editor(editor);
+    //is for replying ?
+	//is for sharing
+    if(is_wall_share )
     {
+		handle_wall_share_composer(editor)
     	return;
     }
-    
-    handle_wall_share_composer(editor)
+	else if(is_wall_reply)
+	{
+		handle_wall_reply_composer(editor)
+	}
+
+   
+}
+
+//////////reply part
+function handle_wall_reply_composer(acomposer)
+{
+	if(!acomposer)
+	{
+		return;
+	}
+	if(acomposer.handled_in_fn_conversation)
+	{
+		return;
+	}
+	log( "handle google plus composer : forReply  " +  acomposer );
+	TOGGLE_OPT_PERSIST.persist(acomposer, g_interesting_webpage_url_rule);
+	
+	var hooked  = hookReplyButton(acomposer)
+	if(!hooked)
+	{
+		return;
+	}
+	
+	var latest_HJContentID = PAGE_PARSER.get_Reply_latest_HJContentID(acomposer);
+	
+	if(latest_HJContentID)
+	{
+		//todo : store it into document.body or elsewhere
+	}
+	//there is not subject in google plus 
+	//var subject = PAGE_PARSER.getReplySubject(acomposer);
+	//if(subject)
+	//{
+		//todo : store it into document or elsewhere
+	//}
+		
+	if(!acomposer.handled_in_fn_conversation)
+	{
+		acomposer.handled_in_fn_conversation = true;
+	}
 }
 
 
+function hookReplyButton(acomposer)
+{
+	var reply_box = PAGE_PARSER.findReplyButton_from_composer(acomposer);
+	if(!!reply_box)
+	{
+	//to do hook the click/command event for reply_box;
+		return true;
+	}
+	
+	return false;
+}
+
+
+//////////share part
 function handle_wall_share_composer(acomposer)
 {
 //WEB_CMM.log("handle_wall_share_composer  in " + acomposer.outerHTML);
@@ -238,13 +300,14 @@ function on_sendbox_click(evt)
 	}
 
 }
+
 function call_simulate_mouse_click_jquery( box_obj$, timeout)
 {
     if(!box_obj$)
         return;
     setTimeout(function(){
                 box_obj$.trigger('click');
-            }	, timeout);
+            }, timeout);
 }
 
 
@@ -371,6 +434,7 @@ self.port.on(c_msg_name_status_fnlogic_action, function(status) {
 
 function is_my_page(url_spec)
 {
+	log( " googleplus_fn : is_my_page : " + g_interesting_webpage_reg_ex + " ==match==" + url_spec);
     var match = g_interesting_webpage_reg_ex.test( url_spec );
     return !!match;
 }

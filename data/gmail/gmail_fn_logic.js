@@ -7,7 +7,7 @@
 "use strict";
 (function() {
 
-var  M_TEST =  fn_web_mocktest_ns;
+//var  M_TEST =  fn_web_mocktest_ns;
 var  WEB_CMM = fn_web_common_ns;
 var TOGGLE_OPT_PERSIST = fn_web_common_persist_fn_toggle_option_ns;
 
@@ -15,16 +15,16 @@ var TOGGLE_OPT_PERSIST = fn_web_common_persist_fn_toggle_option_ns;
 var PAGE_PARSER = fn_webpage_parser_gmail_ns;
 
 //const 
-const g_interesting_webpage_url_rule = "^https:\/\/mail.google.com"
-const g_interesting_webpage_reg_ex  = new RegExp(g_interesting_webpage_url_rule) ;
-const g_msg_name_get_gmail_composer = "get-gmail-composer";
-const g_msg_name_status_gmail_action = "status-gmail-action";
-const g_msg_val_status_gmail_action_start = "start";
-const g_msg_val_status_gmail_action_stop = "stop";
-const c_msg_fn_toggle_options_persist = "fn-toggle-options-persist-msg"; //  msg type
+var g_interesting_webpage_url_rule = "^https:\/\/mail.google.com";
+var g_interesting_webpage_reg_ex  = new RegExp(g_interesting_webpage_url_rule) ;
+var g_msg_name_get_gmail_composer = "get-gmail-composer";
+var g_msg_name_status_gmail_action = "status-gmail-action";
+var g_msg_val_status_gmail_action_start = "start";
+var g_msg_val_status_gmail_action_stop = "stop";
+var c_msg_fn_toggle_options_persist = "fn-toggle-options-persist-msg"; //  msg type
 var  g_status_action = true;
 
-var gmail_composers = [];
+//var gmail_composers = [];
 
 
 /*var  gmail_composer_struct = 
@@ -63,7 +63,7 @@ function handle_gmail_composer(acomposer)
 		PAGE_PARSER.expand_show_trimmed_content(reply_token);
 	}
 	
-	var hooked  = hookSendButton(acomposer)
+	var hooked  = hookSendButton(acomposer);
 	if(!hooked)
 	{
 		return;
