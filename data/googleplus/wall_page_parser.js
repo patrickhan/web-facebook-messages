@@ -21,9 +21,10 @@ const selector_googleplus_wall_share_group_sendbox = "div[guidedhelpid='sharebut
 const selector_googleplus_wall_share_group_tobox = "div[guidedhelpid='sharebox_chips_div']:visible";
 //reply
 const selector_googleplus_wall_reply_group_editor = selector_googleplus_wall_share_group_editor;
-const selector_googleplus_wall_reply_group_parent = "div[role='textbox']:visible";
+const selector_googleplus_wall_reply_group_parent = "div[role='article']:visible";
 const selector_googleplus_wall_reply_group_reply  = "div[role='button']:visible:contains('Post comment')";
-
+const selector_googleplus_wall_HJContentID_container = "div[hjcontentid-container]";
+const attr_googleplus_wall_HJContentID_container = "hjcontentid-container";
 	/*
 group:
 div: "guidedhelpid" ="sharebox"
@@ -154,6 +155,31 @@ div guidedhelpid = shareboxcontrols > guidedhelpid=sharebutton :text=share
 		}
 		return null;
 	}
+	function get_Reply_latest_HJContentID_v2(editor)
+	{
+		var theeditor$ = $(editor);
+		var areply_group$  = theeditor$.closest(selector_googleplus_wall_reply_group_parent);
+		if(areply_group$ && areply_group$.length > 0)
+		{ 
+			var HJContentID_container$  = areply_group$.find(selector_googleplus_wall_HJContentID_container)
+			if(HJContentID_container$ && HJContentID_container$.length > 0)
+			{				
+				var attr_val = HJContentID_container$.attr(attr_googleplus_wall_HJContentID_container);
+				var attr_val_array = JSON.parse(attr_val);
+				var fnDocId = "";
+				if(typeof attr_val_array === "string")
+				{
+					fnDocId = attr_val_array;
+				}
+				else if(Array.isArray(attr_val_array))
+				{
+					fnDocId = attr_val_array[attr_val_array.length-1];
+				}
+				return fnDocId;				
+			}
+		}
+		return null;
+	}
 	function log(msg)
 	{
 		WEB_CMM.log( msg  );
@@ -166,6 +192,7 @@ div guidedhelpid = shareboxcontrols > guidedhelpid=sharebutton :text=share
 	ns.is_wall_reply_editor = is_wall_reply_editor;
 	ns.findReplyButton_from_composer = findReplyButton_from_composer
 	ns.get_Reply_latest_HJContentID = get_Reply_latest_HJContentID
+	ns.get_Reply_latest_HJContentID_v2 =  get_Reply_latest_HJContentID_v2;
 
          
 })(fn_webpage_parser_googleplus_wall_ns); // end of (function(){

@@ -37,12 +37,17 @@
             if(JContentIDs != null)
             {   
                 prNode.fnDocIdVals = [];
+			
                 for(let i = 0; i < JContentIDs.length; i++)
                 {
-                    let fnDocIdVal = JContentIDs[i].substring('HJContentID:'.length);
+					let fnDocIdVal = JContentIDs[i].substring('HJContentID:'.length);
                     prNode.fnDocIdVals.push(fnDocIdVal);
                     prNodeTextContent = prNodeTextContent.replace(JContentIDs[i], "#fnDocIdVal"+i);
                 }
+				if(prNode.fnDocIdVals.length > 0)
+				{
+					prNode.setAttribute("hjcontentid-container", JSON.stringify(prNode.fnDocIdVals));
+				}
             }
 
             if(hackJacketPre != null)
@@ -84,7 +89,7 @@
 
     function switchToFnDocid(prNode)
     {
-        //prNode.innerHTML = "fndocid:"+ prNode.fnDocIdVals.join(' fndocid:');
+        prNode.innerHTML = "fndocid:"+ prNode.fnDocIdVals.join(' fndocid:');
     }
 
     function addInvitaionDiv_V2(prNode, prNodeTextContent)

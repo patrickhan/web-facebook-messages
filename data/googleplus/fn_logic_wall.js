@@ -83,11 +83,12 @@ function handle_wall_reply_composer(acomposer)
 	{
 		return;
 	}
-	
-	var latest_HJContentID = PAGE_PARSER.get_Reply_latest_HJContentID(acomposer);
+	//log( "handle google plus composer : forReply222  " +  acomposer );
+	var latest_HJContentID = PAGE_PARSER.get_Reply_latest_HJContentID_v2(acomposer);
 	
 	if(latest_HJContentID)
 	{
+		log("latest_HJContentID is :" + latest_HJContentID)
 		//todo : store it into document.body or elsewhere
 	}
 	//there is not subject in google plus 
@@ -120,7 +121,7 @@ function hookReplyButton(acomposer)
 //////////share part
 function handle_wall_share_composer(acomposer)
 {
-//WEB_CMM.log("handle_wall_share_composer  in " + acomposer.outerHTML);
+//log("handle_wall_share_composer  in " + acomposer.outerHTML);
 	if(!acomposer)
 	{
 		return;
@@ -135,9 +136,9 @@ function handle_wall_share_composer(acomposer)
 	var uniqID = WEB_CMM.uniqID(10);
 	var a_wall_editor_group =  new Wall_editor_group(acomposer, sendbox, tobox, uniqID);
 	g_wall_editor_groups[uniqID] = a_wall_editor_group;
-	//WEB_CMM.log("handle_wall_share_composer  uniqID: " + uniqID);
-	//WEB_CMM.log("handle_wall_share_composer  sendbox: " + sendbox);
-	//WEB_CMM.log("handle_wall_share_composer  tobox: " + tobox);
+	//log("handle_wall_share_composer  uniqID: " + uniqID);
+	//log("handle_wall_share_composer  sendbox: " + sendbox);
+	//log("handle_wall_share_composer  tobox: " + tobox);
 	hookSendButton(sendbox);
 	hookEditorToggleOption(acomposer);
 	markEditor_fnIntegrated(acomposer);
@@ -176,7 +177,7 @@ function release_wall_share_composer(acomposer)
 	delete acomposer.wall_editor_group_id;
 	delete g_wall_editor_groups[uniqID];
 	
-	WEB_CMM.log("release_wall_share_composer end");
+	log("release_wall_share_composer end");
 }
 
 //main logic ]
@@ -198,7 +199,7 @@ function sending_msg_routing(uniqID)
 	{
 		return ;
 	}
-    WEB_CMM.log("sending_msg_routing");
+    log("sending_msg_routing");
     try{
         WEB_CMM.tell_to_box(a_wall_editor_group.tobox);
         
@@ -211,7 +212,7 @@ function sending_msg_routing(uniqID)
     }
     catch( err )
     {
-    	WEB_CMM.log("sending_msg_routing: exception : " + err)
+    	log("sending_msg_routing: exception : " + err)
     } 
 }
 
@@ -229,7 +230,7 @@ function on_fnaction_over(evt$)	//I use jquery , uniqID is evt.data.editor_gourp
                 //[
                 var a_wall_editor_group = g_wall_editor_groups[uniqID];
 				if(a_wall_editor_group)
-				{//WEB_CMM.log("on_fnaction_over:  removeAttr a_wall_editor_group  :\n " + a_wall_editor_group.editor )
+				{//log("on_fnaction_over:  removeAttr a_wall_editor_group  :\n " + a_wall_editor_group.editor )
 					$(a_wall_editor_group.tobox).removeAttr("fnremotehtmlreq-event-param");   
 	                $(a_wall_editor_group.editor).removeAttr("fnremotehtmlreq-event-param");   
 				}
@@ -246,7 +247,7 @@ function on_fnaction_over(evt$)	//I use jquery , uniqID is evt.data.editor_gourp
                     $(document.body).removeAttr("fnremotehtmlreq-event-param-subvalue");
                     if (untrustedEmails.length > 0) {
                         WEB_CMM.onprepare_send_invitation(a_wall_editor_group.editor, untrustedEmails);
-						//WEB_CMM.log("on_fnaction_over:  onprepare_send_invitation  :\n " + untrustedEmails )
+						//log("on_fnaction_over:  onprepare_send_invitation  :\n " + untrustedEmails )
                     }
                 }
                 //click the button again
@@ -256,7 +257,7 @@ function on_fnaction_over(evt$)	//I use jquery , uniqID is evt.data.editor_gourp
     }
     catch(err)
     {
-    	WEB_CMM.log("on_fnaction_over: exception : " + err)
+    	log("on_fnaction_over: exception : " + err)
     }
 }
 
@@ -265,7 +266,7 @@ function on_fnaction_over(evt$)	//I use jquery , uniqID is evt.data.editor_gourp
 
 function on_sendbox_click(evt)
 {
-	WEB_CMM.log("on_sendbox_click evt.target." +evt.target)
+	log("on_sendbox_click evt.target." +evt.target)
     //not fn toggle, just return 
 	try{
 		var uniqID = evt.target.wall_editor_group_id;
@@ -273,12 +274,12 @@ function on_sendbox_click(evt)
 		{
 			return;
 		}
-		//WEB_CMM.log("on_sendbox_click evt.target.wall_editor_group_id " +evt.target.wall_editor_group_id)
+		//log("on_sendbox_click evt.target.wall_editor_group_id " +evt.target.wall_editor_group_id)
         var a_wall_editor_group = g_wall_editor_groups[uniqID];	
-		//WEB_CMM.log("on_sendbox_click evt.target.a_wall_editor_group.editor " +a_wall_editor_group.editor)
+		//log("on_sendbox_click evt.target.a_wall_editor_group.editor " +a_wall_editor_group.editor)
 	    //var fn_toggle_option = $(a_wall_editor_group.editor).attr('fn-toggle-option');
 	    //if (!fn_toggle_option ) {
-		//	//WEB_CMM.log("on_sendbox_click !fn_toggle_option return" );
+		//	//log("on_sendbox_click !fn_toggle_option return" );
 	    //    return;
 	    //}
 	    if(!evt.target.hj_cocntrol || evt.target.hj_cocntrol == 0)
@@ -296,7 +297,7 @@ function on_sendbox_click(evt)
 	}
 	catch(err)
 	{
-		WEB_CMM.log("on_fnaction_over: exception : " + err)
+		log("on_fnaction_over: exception : " + err)
 	}
 
 }
@@ -329,8 +330,8 @@ function on_fn_toggle_option_changed(evt$)
 	var target  =  evt.target;
 	if(evt.attrName == "fn-toggle-option"  )
     {
-    	//WEB_CMM.log("on_fn_toggle_option_changed:  fn-toggle-option newValue is : "  + evt.newValue);
-    	//WEB_CMM.log("on_fn_toggle_option_changed:  fn-toggle-option event.prevValue is : "  + evt.prevValue);
+    	//log("on_fn_toggle_option_changed:  fn-toggle-option newValue is : "  + evt.newValue);
+    	//log("on_fn_toggle_option_changed:  fn-toggle-option event.prevValue is : "  + evt.prevValue);
     	//if(evt.prevValue === "FNRTE" && evt.newValue !=="FNRTE" )
 		if(!evt.newValue)
 		{
@@ -381,7 +382,7 @@ function on_FNToggle_editor_focus(evt) {
     }
 	catch(err)
     {
-		WEB_CMM.log("on_FNToggle_editor_focus: exception : " + err);
+		log("on_FNToggle_editor_focus: exception : " + err);
     }
          
 }
