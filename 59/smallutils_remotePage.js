@@ -31,8 +31,6 @@ function SendInvitation_ForWebPage(doc, param, receipObj)
     //doc.fntoggledPlg is the editor 
     //for fn integrated webpage and the editor is a  non-fnrte editor
     //we trigger a event to do encryption by set the attribute 'togglecommandchecked =true' of the editor
-	
-	
     if(doc.fntoggledPlg !== undefined && doc.fntoggledPlg != null)
     {
 	    let anOETController = g_OETManager.find_editorHandler(doc.fntoggledPlg);
@@ -53,14 +51,14 @@ function SendInvitation_ForWebPage(doc, param, receipObj)
     
     function processGotFndocids(doc)
     {
-	try
-	{
-	    sortFnDocidOfADoc(doc);
-	}
-	catch(err)
-	{
-	   alert(err);
-	}
+		try
+		{
+			sortFnDocidOfADoc(doc);
+		}
+		catch(err)
+		{
+		   alert(err);
+		}
 		console.log(doc.m_FN_receiptsObj + "   " + doc.fntoggledPlg + " dfsdfsd   " + doc.m_FN_ToggledBackFndocids + " sdfasdfasd " + doc.m_FN_ToggledBackFndocids.length);
         if(doc.m_FN_receiptsObj !== undefined && doc.fntoggledPlg !== undefined
            && doc.m_FN_ToggledBackFndocids !== undefined &&
@@ -89,65 +87,64 @@ function SendInvitation_ForWebPage(doc, param, receipObj)
                     let aEmail = match[i];
                     //Use the email to get ownerid
                     ContactModule.getOwnerIdByEmail(aEmail, function(result){
-                        if(result != null && result.length > 0)
-                        {
-                            for(let resultCount = 0; resultCount < result.length; ++resultCount)
-                            {
-                                let ownerid = result[resultCount].ownerid;
-                                let fndocids = doc.m_FN_ToggledBackFndocids;
-                                for(let fndocidCounter = 0; fndocidCounter < fndocids.length; ++fndocidCounter)
-                                {
-                                    let fndocid = fndocids[fndocidCounter].fndocid;
-				    let key =  fndocids[fndocidCounter].pkey;
-                                    //Upload fndocid with this ownerid to server                           
-                                    createAKeyForADocByOwnerId(fndocid, ownerid, key);
-                                }
-                            }
-                        }
-                        else
-                        {
-			   if(untrustedEmails.length > 0 )
-			    {
-				untrustedEmails +=";"
-			    }
-			    untrustedEmails += aEmail
-                            if(isSendInivation == false)
-                            {
-                                isSendInivation = true;
-                                let fndocids = doc.m_FN_ToggledBackFndocids;                                                
-                                //Add an invitation fndoc to fn_inviation_doc_key                        
-                                for(let fndocidCounter = 0; fndocidCounter < fndocids.length; ++fndocidCounter)
-                                {
-                                    let fndocid = fndocids[fndocidCounter].fndocid; 
-				                    let key =  fndocids[fndocidCounter].pkey;					                    								
-                                    addInvitationFndoc(fndocid, key);
-                                }    
-                            }                                            
-                        }
+						if(result != null && result.length > 0)
+						{
+							for(let resultCount = 0; resultCount < result.length; ++resultCount)
+							{
+								let ownerid = result[resultCount].ownerid;
+								let fndocids = doc.m_FN_ToggledBackFndocids;
+								for(let fndocidCounter = 0; fndocidCounter < fndocids.length; ++fndocidCounter)
+								{
+									let fndocid = fndocids[fndocidCounter].fndocid;
+									let key =  fndocids[fndocidCounter].pkey;
+									//Upload fndocid with this ownerid to server                           
+									createAKeyForADocByOwnerId(fndocid, ownerid, key);
+								}
+							}
+						}
+						else
+						{
+						   if(untrustedEmails.length > 0 )
+							{
+								untrustedEmails +=";"
+							}
+							untrustedEmails += aEmail
+							if(isSendInivation == false)
+							{
+								isSendInivation = true;
+								let fndocids = doc.m_FN_ToggledBackFndocids;                                                
+								//Add an invitation fndoc to fn_inviation_doc_key                        
+								for(let fndocidCounter = 0; fndocidCounter < fndocids.length; ++fndocidCounter)
+								{
+									let fndocid = fndocids[fndocidCounter].fndocid; 
+									let key =  fndocids[fndocidCounter].pkey;					                    								
+									addInvitationFndoc(fndocid, key);
+								}    
+							}                                            
+						}
 
-                        
-                        if(i == match.length)
-                        {
-                                
-			    let temparray = [];
-			    for(let count = 0; count < doc.m_FN_ToggledBackFndocids.length; ++count)
-			    {
-				temparray.push(doc.m_FN_ToggledBackFndocids[count].fndocid);
-			    }
-			    doc.m_FN_ToggledBackFndocids = temparray;
-			    toggleBack_v2(doc, doc.m_FN_ToggledBackFndocids, null, false); //false Don't set focus when write back
-			    if(isSendInivation == true)
-                            {
-				                doc.body.setAttribute("fnRemoteHtmlReq-event-param-subvalue", untrustedEmails);
-                                doc.body.setAttribute("fnRemoteHtmlReq-event-param", "true");
-				                release_initationElements(doc);
-                            } 
-                            else
-                            {                            
-                                doc.body.setAttribute("fnRemoteHtmlReq-event-param", "false");
-                                release_initationElements(doc);
-                            }
-                        }
+						
+						if(i == match.length)
+						{
+							let temparray = [];
+							for(let count = 0; count < doc.m_FN_ToggledBackFndocids.length; ++count)
+							{
+							temparray.push(doc.m_FN_ToggledBackFndocids[count].fndocid);
+							}
+							doc.m_FN_ToggledBackFndocids = temparray;
+							toggleBack_v2(doc, doc.m_FN_ToggledBackFndocids, null, false); //false Don't set focus when write back
+							if(isSendInivation == true)
+							{
+								doc.body.setAttribute("fnRemoteHtmlReq-event-param-subvalue", untrustedEmails);
+								doc.body.setAttribute("fnRemoteHtmlReq-event-param", "true");
+								release_initationElements(doc);
+							} 
+							else
+							{                            
+								doc.body.setAttribute("fnRemoteHtmlReq-event-param", "false");
+								release_initationElements(doc);
+							}
+						}
                     });
                 }
             }
@@ -247,7 +244,7 @@ function RTEobjShowPlainTextMsgMixFormat_ForWebpage_V2(doc, param, rteobj)
 
 
 function addReceiptsToAnInput_ForWebPage(doc, param, inputEle)
-{
+{ 
     //inputEle.currentReaders !== undefined
     if(inputEle.currentReaders !== undefined)
     {
@@ -264,6 +261,44 @@ function addReceiptsToAnInput_ForWebPage(doc, param, inputEle)
 		});
         
     }
+}
+
+function addReceiptFNIDToAnInput_ForWebPage(doc, param, inputEle)
+{ 
+	//if inputEle.currentReaders is created then append the reader in it,
+	//otherwise , using doc.m_FN_ToggledBackFndocids which is set just after toggle 
+	//, and then using createAKeyForADocByOwnerId
+	if(inputEle.currentReaders !== undefined)
+    {
+	    let aFNID = param;	//aFNID is number 
+		if(aFNID )
+		{
+			inputEle.currentReaders[aFNID.toString()] = aFNID;			
+		} 
+    }
+	else
+	{  
+		let aFNID = param;	//aFNID is number 	
+		let fndocids = doc.m_FN_ToggledBackFndocids;
+		for(let fndocidCounter = 0; fndocidCounter < fndocids.length; ++fndocidCounter)
+		{
+			let fndocid = fndocids[fndocidCounter].fndocid;
+			let key =  fndocids[fndocidCounter].pkey; 
+			//Upload fndocid with this ownerid to server                           	
+			if(fndocid && key && aFNID)
+			{
+				createAKeyForADocByOwnerId(fndocid, aFNID, key);
+			}
+			else
+			{
+				fndocid = fndocids[fndocidCounter];
+				if(fndocid && aFNID)
+				{
+					createAKeyForADocByOwnerId(fndocid, aFNID)
+				}
+			}
+		}
+	}
 }
 
 function setReceiptobjForInivitation_forRemoteWebpage(doc, param, receiptObj)
@@ -342,38 +377,44 @@ EcselfDefineGlobalScope.FnTextBoxBlurEvtProcess = function(doc, fnboxEle)
 
 function getEmailsOfAnObject_facebook_forRemoteWebpage(doc, param, theobj)
 {
-    ContactModule.getfacebook_names(param, function(rets){
-	if (!rets) {
-	    return;
+	//var input_param_value = {"sender":myfacebookAccountName, "audiences": recepients}
+	//get webpage IM account name
+	var webpage_IM_account_name =  null; // e.g facebook a user logins as "John Smith"
+	var webpage_IM_provider = null ;// facebook or others
+	var fileCom = Components.classes["@fntechnologies.com/fileExplorer/fileSelectorCom;1"].getService().wrappedJSObject;
+	if(fileCom) {
+		var temp = fileCom.getServiceProviderAndHandle(doc);
+		webpage_IM_provider = temp.serviceProviderName; //fu "facebookName"
+		webpage_IM_account_name = temp.handleName;   //"John Smith";
 	}
-	var names = [];
-	for (var index = 0; index <rets.length; index++ ) {
-	    names.push(rets[index].name);
-	}
-	alert( " before call MessageProcessor names " + names.toString() );
-	var chattersArray =  names;
-	theobj.m_tempchattersArray = chattersArray;
-	var data = {"serviceName":"getImEmailByHandleAndName", "message": {
-	    data : {"imName": "facebookName", "imHandle": chattersArray},
-	    args : theobj,
-	    finish: function(ret, ele1) {
-		alert( " MessageProcessor.MsgServer().sendMsg(doc, new MessageProcessor.MsgServer().newMsg('selfMessageProcessor', data)); call back");
-		alert( " MessageProcessor in call back + ret " + ret.toString() );
-		alert( " MessageProcessor in call back + ele1 " + ele1.toString() );
-		let responseEmails = [];
-		    if(ret.length < ele1.m_tempchattersArray.length) {		        
-			    responseEmails.push("iva@fn.com");
-		    }	        
-				    
-		    for(var i=0;i<ret.length;++i) {
-			    responseEmails.push(ret[i].emailAddress);
-		    }
-		    alert( " MessageProcessor call back + responseEmails " + responseEmails.toString() );
-		    delete ele1.m_tempchattersArray;
-		    ele1.setAttribute("getemailsofanobject_facebook_forremotewebpage_res", JSON.stringify(responseEmails));
-	    },
-	}};    
-	new MessageProcessor.MsgServer().sendMsg(doc, new MessageProcessor.MsgServer().newMsg("selfMessageProcessor", data));
+    ContactModule.getIM_Account_names(webpage_IM_provider, webpage_IM_account_name , param, function(rets){
+		if (!rets) {
+			return;
+		}
+		var names = [];
+		for (var index = 0; index <rets.length; index++ ) {
+			names.push(rets[index].name);
+		}
+		var chattersArray =  names;
+		//theobj.m_tempchattersArray = chattersArray;
+		var data = {"serviceName":"getImEmailByHandleAndName", "message": {
+			data : {"imName": "facebookName", "imHandle": chattersArray},
+			args : theobj,
+			finish: function(ret, ele1) {
+				let responseEmails = [];
+				if(ret.length < chattersArray.length) {		        
+					responseEmails.push("iva@fn.com");
+				}	        
+						
+				for(var i=0;i<ret.length;++i) {
+					responseEmails.push(ret[i].emailAddress);
+				}
+				//delete ele1.m_tempchattersArray;
+				theobj.setAttribute("getemailsofanobject_facebook_forremotewebpage_res", JSON.stringify(responseEmails));
+			},//end of finish: function
+		}//end of "message":
+		};//end of   var data  
+		new MessageProcessor.MsgServer().sendMsg(doc, new MessageProcessor.MsgServer().newMsg("selfMessageProcessor", data));
     });
 }
 

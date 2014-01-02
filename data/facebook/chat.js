@@ -30,7 +30,7 @@ var WEB_TEST = facebook_test_ns;//.create_test_panel =  create_test_panel;
 		var chatTag$ =  $(anInput).closest("div[class='"+ g_facebook_chat_div_classname +"']");
 		if(chatTag$)
 		{
-			return chatTag$
+			return chatTag$;
 		}
 	    return null;
 	}
@@ -44,7 +44,7 @@ var WEB_TEST = facebook_test_ns;//.create_test_panel =  create_test_panel;
 		var chatTag$ =  $(fnrte_sender).closest("div[class='"+ g_facebook_chat_div_classname +"']");
 		if(chatTag$)
 		{
-			return chatTag$
+			return chatTag$;
 		}
 	    return null;
 	}
@@ -149,7 +149,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 			WEB_CMM.log("start send message..............");
 			
 			var data = {"imtype": "facebook", "msgheader":"passDataFromRTE", "eleRteS": eleRteS, "message": {
-					data:[{ "receiver":receivers, }],
+					data:[{ "receiver":receivers }],
 					args : "",
 					finish: function(ret, doc) {
 
@@ -176,7 +176,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 							       
 						}
 
-					}.bind({win: window, ele:afacebookchattag_}),
+					}.bind({win: window, ele:afacebookchattag_})
 				}
 			};
 			var msgObj = window.wrappedJSObject.MessageProcessor;
@@ -246,7 +246,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
                         target.m_fnrecipients.push(nameTextNodes.snapshotItem(counter).nodeValue);
                     }
                     WEB_CMM.log(" fillRecipientsTo_fnrecipients: m_fnrecipients:  " + target.m_fnrecipients );
-                }, false)
+                }, false);
                 var evObj = document.createEvent('MouseEvents');
                 evObj.initEvent( 'mouseenter', true, false );
                 the_A_Node.dispatchEvent(evObj);	  
@@ -486,7 +486,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		{
 			var outStr = "";
  
-			var item  =  this 
+			var item  =  this ;
 			var sender = "sender=" + item.sender_ + "\n";
 			outStr +=sender;
 			for(var j = 0; j < item.messages_.length; j++)
@@ -519,7 +519,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		 }
 		 else
 		 {
-			 return conversation_item2
+			 return conversation_item2;
 		 }
 		 
 		 return null;
@@ -721,7 +721,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 			chatTag.conversation_obj = afacebook_chat_conversation_obj;
 			 
 			 WEB_CMM.log("   please show these : " + afacebook_chat_conversation_obj.toStringf());
-			sendout_conversation_content(chatTag, afacebook_chat_conversation_obj)
+			sendout_conversation_content(chatTag, afacebook_chat_conversation_obj);
 		}
 		else
 		{
@@ -806,7 +806,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 	{ 
 	
 		WEB_CMM.log(" in listener_for_facebook_chat_changing: " + evt.data.facebookchattag );
-		var target  =  evt.data.facebookchattag
+		var target  =  evt.data.facebookchattag;
 		if(!target.change_counting )
 		{
 			target.change_counting = {"counter":0};
@@ -817,7 +817,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		}
 		
 		
-		setTimeout(get_facebook_chat_conversation_data, 1000, target.change_counting["counter"] ,target)
+		setTimeout(get_facebook_chat_conversation_data, 1000, target.change_counting["counter"] ,target);
 	}
 	
 	function add_listener_for_facebook_chat_changing(chatTag)
@@ -965,7 +965,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 		
 		try
 		{//if fnchattag is show and param:show=true do nothing
-			var afn_chatTag$ = get_fnchatTag_in_facebookchatTag(chatTag)
+			var afn_chatTag$ = get_fnchatTag_in_facebookchatTag(chatTag);
 			var shown = fn_chatTag_is_shown(afn_chatTag$);
 			if(shown)
 			{
@@ -1047,7 +1047,7 @@ const g_fn_html_chat_tag_str='	<div class="fn-facebook-chat">\
 
 		if( is_my_page(url_spec) )
 		{
-			WEB_CMM.log(" face book chat is_my_page")
+			WEB_CMM.log(" face book chat is_my_page");
 			add_FNToggle_editor_focus_listener();
 			//WEB_TEST.create_test_panel();
 			sendMessage_after_fn_logic_excute();

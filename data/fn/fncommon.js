@@ -5,12 +5,11 @@
 
 "use strict";
 
-var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
+var fn_web_common_ns  = fn_web_common_ns ||  {} ;
 
 (function(ns)
 {
-	const HJContentIDRegEx = new RegExp('HJContentID:([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})', 'gm');        	    
-
+	const HJContentIDRegEx = new RegExp('HJContentID:([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})', 'gm');
 	const emailAddrRegEx = new RegExp('(\\w+\\.)*\\w+@(\\w+\\.)+[A-Za-z]+', 'gm');
     var charstoformid = '_0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'.split('');
     function uniqID(idlength) {
@@ -32,16 +31,6 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
         }
     }
     
-    function setflag_toggle_notshowToBox(editor)
-    {
-        editor.wrappedJSObject.fnhookedFlag = true;
-    }
-    function clearflag_toggle_notshowToBox(editor)
-    {
-        delete editor.wrappedJSObject.fnhookedFlag;
-    }
-    
-    
     function call_simulate_mouse_click( box_obj, timeout)
     {
         if(!box_obj)
@@ -53,14 +42,14 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
                     } else {
                       return obj.offsetLeft + getX( obj.offsetParent );
                     }
-              }
+              };
               var getY = function( obj ) {
                     if( obj == null ) {
                       return 0;
                     } else {
                       return obj.offsetTop + getY( obj.offsetParent );
                     }
-              }
+              };
               var evt = document.createEvent("MouseEvents");
               evt.initMouseEvent("mousedown", true, true, window,
                     0, 0, 0, 0, 0, false, false, false, false, 0, null);
@@ -95,6 +84,10 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     
     function tell_to_box( tobox)
     {
+		if(!tobox)
+		{
+			return;
+		}
         var transobj = {funname:"setReceiptobjForInivitation_forRemoteWebpage", param:null};    	        
         $(tobox).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
         var event = document.createEvent("HTMLEvents");        
@@ -104,6 +97,10 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     
     function fill_a_recepient(editor, email )
     {
+		if(!editor || !email )
+		{
+			return;
+		}
         var transobj = {funname:"addReceiptsToAnInput_ForWebPage", param:email};    	        
         $(editor).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));              
         var event = document.createEvent("HTMLEvents");        
@@ -111,9 +108,28 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
         editor.dispatchEvent(event); 
         
     }
+
+	function fill_a_recepient_by_FNID(editor, aFNID )
+    {
+		if(!editor || !aFNID )
+		{
+			return;
+		}
+		log( "fill_a_recepient_by_FNID : " + aFNID)
+        var transobj = {funname:"addReceiptFNIDToAnInput_ForWebPage", param:aFNID};    	        
+        $(editor).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));              
+        var event = document.createEvent("HTMLEvents");
+        event.initEvent("fnRemoteHtmlReq-event", true, false);            
+        editor.dispatchEvent(event); 
+        
+    }
     
     function fill_recepients(editor, tobox)
     {
+		if(!editor || !tobox )
+		{
+			return;
+		}
         //file the recepients
         var emailAddrFinder = emailAddrRegEx;
         var htmlString = tobox.innerHTML;
@@ -127,9 +143,28 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
             fill_a_recepient(editor, anEmailAddr );
         } 
     }
+
+	function fill_recepients_by_FNIDs(editor, array_FNIDs)
+    {
+		if(!editor || !array_FNIDs )
+		{
+			return;
+		}
+        //file the recepients
+        for(var index = 0; index < array_FNIDs.length; ++index)
+        {
+            var aFNID = array_FNIDs[index];
+            fill_a_recepient_by_FNID(editor, aFNID );
+			
+        } 
+    }
     
     function tell_editor(editor)
     {
+		if(!editor  )
+		{
+			return;
+		}
         var transobj = {funname:"setEditorobjForInivitation_forRemoteWebpage", param:null};    	        
         $(editor).attr("fnRemoteHtmlReq-event-param", JSON.stringify(transobj));                
         var event = document.createEvent("HTMLEvents");        
@@ -229,7 +264,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
 	        var sentdataObj = JSON.parse(rteobj.GetSendData(ret_content) );        
 			if(sentdataObj.length <= 1)
 			{
-				WEB_CMM.log("error: rteobj plugin call GetSendData : length <= 1"  );
+				log("error: rteobj plugin call GetSendData : length <= 1"  );
 			}
 			else
 			{	   	      
@@ -272,7 +307,7 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
 		  u[this[i]] = 1;
 		}
 		return a;
-	}
+	};
     //export
     //functions
 	function Array_getUnique(array_in)
@@ -295,12 +330,13 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
     ns.nolog = false;
     ns.uniqID = uniqID;
     ns.log = log;
-    ns.setflag_toggle_notshowToBox =  setflag_toggle_notshowToBox;
-    ns.clearflag_toggle_notshowToBox =  clearflag_toggle_notshowToBox;
+
     ns.call_simulate_mouse_click =  call_simulate_mouse_click;
     
     ns.tell_to_box = tell_to_box;
     ns.fill_a_recepient = fill_a_recepient;
+	ns.fill_a_recepient_by_FNID =  fill_a_recepient_by_FNID;
+	ns.fill_recepients_by_FNIDs = fill_recepients_by_FNIDs;
     ns.fill_recepients = fill_recepients;
     ns.tell_editor = tell_editor;
     ns.trigger_preSending = trigger_preSending;
@@ -309,10 +345,11 @@ var fn_web_common_ns  = (undefined === fn_web_common_ns) ? {}: fn_web_common_ns;
 	ns.unlisten_After_preSending_event = unlisten_After_preSending_event;
     ns.onprepare_send_invitation = onprepare_send_invitation;
 	
-    
+    //with integrated flag, there will no recipeints ui in CIA UI, nor FN encrypted UI
     ns.markEditor_fnIntegrated_flag = markEditor_fnIntegrated_flag;
 	ns.removeEditor_fnIntegrated_flag = removeEditor_fnIntegrated_flag;
-	
+	ns.setflag_toggle_notshowToBox =  markEditor_fnIntegrated_flag;
+    ns.clearflag_toggle_notshowToBox =  removeEditor_fnIntegrated_flag;
 	//fntre
 	ns.fnrte_util_clean_content = fnrte_util_clean_content;
 	ns.fnrte_util_get_fndocid =  fnrte_util_get_fndocid;

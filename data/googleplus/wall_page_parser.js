@@ -163,23 +163,40 @@ div guidedhelpid = shareboxcontrols > guidedhelpid=sharebutton :text=share
 		{ 
 			var HJContentID_container$  = areply_group$.find(selector_googleplus_wall_HJContentID_container)
 			if(HJContentID_container$ && HJContentID_container$.length > 0)
-			{				
-				var attr_val = HJContentID_container$.attr(attr_googleplus_wall_HJContentID_container);
-				var attr_val_array = JSON.parse(attr_val);
-				var fnDocId = "";
-				if(typeof attr_val_array === "string")
-				{
-					fnDocId = attr_val_array;
-				}
-				else if(Array.isArray(attr_val_array))
-				{
-					fnDocId = attr_val_array[attr_val_array.length-1];
-				}
+			{	
+				var attr_val_array = [];
+				HJContentID_container$.each( function(){
+					var aval = $(this).attr(attr_googleplus_wall_HJContentID_container);
+					if(aval && aval.length > 0)
+					{log("get_Reply_latest_HJContentID_v2: aval type:" + typeof aval);
+						log("get_Reply_latest_HJContentID_v2: aval :" + aval);
+						attr_val_array.push(aval);
+					}
+				});
+				log("get_Reply_latest_HJContentID_v2:" + attr_val_array.toString());
+				var fnDocId = attr_val_array[attr_val_array.length-1];
+				log("get_Reply_latest_HJContentID_v2: ret :" + fnDocId);
 				return fnDocId;				
 			}
 		}
 		return null;
 	}
+	
+	function create_a_hidden_tobox(parentNode, a_id, recipients_emails)//return to_boxes$
+	{
+		parentNode = parentNode || document.body;
+		var to_boxes$ = $('<div></div>').appendTo(parentNode).hide();
+	    to_boxes$.attr(role_name, WEB_CMM.ROLE_NAME_TO_BOX);
+	    if(a_id && a_id.length > 0)
+	    {
+	    	to_boxes$.attr('id', a_id);
+	    }
+	    var recipients_emails_txt = recipients_emails.join(";");
+	    to_boxes$.text( recipients_emails_txt );
+	    return to_boxes$
+	}
+	
+	
 	function log(msg)
 	{
 		WEB_CMM.log( msg  );
@@ -193,6 +210,7 @@ div guidedhelpid = shareboxcontrols > guidedhelpid=sharebutton :text=share
 	ns.findReplyButton_from_composer = findReplyButton_from_composer
 	ns.get_Reply_latest_HJContentID = get_Reply_latest_HJContentID
 	ns.get_Reply_latest_HJContentID_v2 =  get_Reply_latest_HJContentID_v2;
+	ns.create_a_hidden_tobox = create_a_hidden_tobox;
 
          
 })(fn_webpage_parser_googleplus_wall_ns); // end of (function(){

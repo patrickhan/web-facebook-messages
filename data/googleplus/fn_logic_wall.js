@@ -24,18 +24,23 @@ const g_interesting_webpage_reg_ex  = new RegExp(g_interesting_webpage_url_rule)
 const c_msg_name_get_composer = "get-googleplus_share-composer";
 
 const c_msg_name_status_fnlogic_action = "status-fnlogic-action";// tell the page content js to start/stop  fn logic by 'status'
+const c_msg_name_status_fnlogic_aHJContentID_recipients_query = "fnlogic_aHJContentID_recipients_query";// ask
+const c_msg_name_status_fnlogic_aHJContentID_recipients_reply = "fnlogic_aHJContentID_recipients_reply";// answer
 
 var  g_status_action = true; // run fnlogic or not
 
-function Wall_editor_group(editor, sendbox, tobox, id)
+
+function Wall_editor_group(editor, sendbox, tobox, id, for_reply, reply_recipients)
 {
-   this.editor =  editor;
-   this.sendbox =  sendbox; 
-   this.tobox =  tobox;
+	this.editor =  editor;
+	this.sendbox =  sendbox; 
+	this.tobox =  tobox;
    
-   this.editor.wall_editor_group_id 	= id;
-   this.sendbox.wall_editor_group_id	= id;
-   this.tobox.wall_editor_group_id 		= id;
+	this.editor && (this.editor.wall_editor_group_id = id);
+	this.sendbox && (this.sendbox.wall_editor_group_id	= id);
+	this.tobox && (	this.tobox.wall_editor_group_id = id );
+	this.for_reply =  for_reply;
+	this.reply_recipients = reply_recipients;
 };
 
 var g_wall_editor_groups ={};//dict {id:wall_editor_group}
@@ -59,24 +64,83 @@ function collect_wall_share_composer(editor) {
 	else if(is_wall_reply)
 	{
 		handle_wall_reply_composer(editor)
-	}
-
-   
+	}   
 }
 
 //////////reply part
-function handle_wall_reply_composer(acomposer)
+var g_deffered_tasks = {};
+
+self.port.on(c_msg_name_status_fnlogic_aHJContentID_recipients_reply, function(data) {
+
+	//var data_send = { id:a_id, recipients:data };
+	var data_obj =  JSON.parse (data);
+	
+	var recipients_array = data_obj.recipients;
+	var a_id = data_obj.id;
+	var adeferred_task = g_deffered_tasks[a_id];
+	if(adeferred_task)
+	{
+		delete g_deffered_tasks[a_id];
+		adeferred_task.resolve(data);
+	}
+
+});
+
+function handle_wall_reply_composer_preAction( aHJContentID )
 {
-	if(!acomposer)
+	log("handle_wall_reply_composer_preAction for aHJContentID : " + aHJContentID)
+	//todo prepare the recipients info for replying,
+	//preparing the recipients, should be ansychronized, I want to use js 'promiae and deffer'
+	//refer Using Deferreds in jQuery from http://www.erichynds.com/blog/using-deferreds-in-jquery
+	//more : http://blog.mediumequalsmessage.com/promise-deferred-objects-in-javascript-pt1-theory-and-semantics
+	var deferred_task = $.Deferred();
+	var a_id = WEB_CMM.uniqID(10);
+	var data_obj = {HJContentID:aHJContentID, id: a_id };
+	var data_string =  JSON.stringify(data_obj);
+	g_deffered_tasks[a_id] = deferred_task;
+	self.port.emit(c_msg_name_status_fnlogic_aHJContentID_recipients_query, data_string);
+
+	log("emit c_msg_name_status_fnlogic_aHJContentID_recipients_query : " + data_string);
+
+	return deferred_task.promise();
+}
+
+function handle_wall_reply_composer_postAction(data)
+{
+	log("handle_wall_reply_composer_postAction : data " + data);
+	// this is bind as acomposer
+	var  acomposer = this;
+	
+	var data_obj =  JSON.parse (data);
+	var recipients = data_obj.recipients;
+	var uniqID = WEB_CMM.uniqID(10);
+
+	if(!recipients || recipients.length == 0)
 	{
-		return;
+		return;// no recipients_emails, not for fncipher reply;
 	}
-	if(acomposer.handled_in_fn_conversation)
-	{
-		return;
-	}
-	log( "handle google plus composer : forReply  " +  acomposer );
-	TOGGLE_OPT_PERSIST.persist(acomposer, g_interesting_webpage_url_rule);
+	
+	log( "handle_wall_reply_composer_postAction  " + JSON.stringify( {composer: acomposer, recipients:recipients, id:uniqID}) );
+	
+	var uniqID = WEB_CMM.uniqID(10);
+	var reply_box = PAGE_PARSER.findReplyButton_from_composer(acomposer)[0];
+	//we dicide to not create a hidden tobox , but only keep the 'recipients' in js varaible.
+	//var to_boxes = PAGE_PARSER.create_a_hidden_tobox(parentNode, a_id, recipients_emails)[0];//return to_boxes$;
+	
+	
+	var a_wall_editor_group =  new Wall_editor_group(acomposer, reply_box, null, uniqID, true,recipients);
+	g_wall_editor_groups[uniqID] = a_wall_editor_group;
+
+	hookSendButton(reply_box);
+	hookEditorToggleOption(acomposer);
+	markEditor_fnIntegrated(acomposer);
+}
+
+function handle_wall_reply_composer_for_association(acomposer)
+{//maybe we need to do like this, not finished,  just for reference
+	
+	//log( "handle_wall_reply_composer_for_association  " +  acomposer );
+	//TOGGLE_OPT_PERSIST.persist(acomposer, g_interesting_webpage_url_rule);
 	
 	var hooked  = hookReplyButton(acomposer)
 	if(!hooked)
@@ -84,6 +148,7 @@ function handle_wall_reply_composer(acomposer)
 		return;
 	}
 	//log( "handle google plus composer : forReply222  " +  acomposer );
+	//so far, we are not have a clear view to how to deal with reply, let use the latest fn docid.
 	var latest_HJContentID = PAGE_PARSER.get_Reply_latest_HJContentID_v2(acomposer);
 	
 	if(latest_HJContentID)
@@ -104,10 +169,39 @@ function handle_wall_reply_composer(acomposer)
 	}
 }
 
+function handle_wall_reply_composer(acomposer)
+{
+	log("handle_wall_reply_composer in")
+	if(!acomposer)
+	{
+		return;
+	}
+	if(acomposer.handled_in_fn_wall)
+	{
+		return;
+	}
+	var latest_HJContentID = PAGE_PARSER.get_Reply_latest_HJContentID_v2(acomposer);
+	
+	if(!latest_HJContentID)
+	{
+		return;// this is reply , if there is no HJContentID, do not use fn encryption
+	}
+	
+	//handle_wall_reply_composer_postAction , should bind 'acomposer'
+	var preAction_deffered = handle_wall_reply_composer_preAction(latest_HJContentID);
+	
+	preAction_deffered.then( handle_wall_reply_composer_postAction.bind(acomposer) );
+
+	if(!acomposer.handled_in_fn_wall)
+	{
+		acomposer.handled_in_fn_wall = true;
+	}
+}
+
 
 function hookReplyButton(acomposer)
 {
-	var reply_box = PAGE_PARSER.findReplyButton_from_composer(acomposer);
+	var reply_box$ = PAGE_PARSER.findReplyButton_from_composer(acomposer);
 	if(!!reply_box)
 	{
 	//to do hook the click/command event for reply_box;
@@ -134,7 +228,7 @@ function handle_wall_share_composer(acomposer)
 	var tobox = PAGE_PARSER.get_tobox(acomposer);
 	
 	var uniqID = WEB_CMM.uniqID(10);
-	var a_wall_editor_group =  new Wall_editor_group(acomposer, sendbox, tobox, uniqID);
+	var a_wall_editor_group =  new Wall_editor_group(acomposer, sendbox, tobox, uniqID,false,null);
 	g_wall_editor_groups[uniqID] = a_wall_editor_group;
 	//log("handle_wall_share_composer  uniqID: " + uniqID);
 	//log("handle_wall_share_composer  sendbox: " + sendbox);
@@ -199,12 +293,21 @@ function sending_msg_routing(uniqID)
 	{
 		return ;
 	}
-    log("sending_msg_routing");
+    log("sending_msg_routing for " + JSON.stringify(a_wall_editor_group));
     try{
         WEB_CMM.tell_to_box(a_wall_editor_group.tobox);
         
         WEB_CMM.tell_editor( a_wall_editor_group.editor );
-        WEB_CMM.fill_recepients(a_wall_editor_group.editor, a_wall_editor_group.tobox)
+        if(!a_wall_editor_group.for_reply)
+        {
+log("sending_msg_routing sharing: " + uniqID);
+        	 WEB_CMM.fill_recepients(a_wall_editor_group.editor, a_wall_editor_group.tobox);
+        }
+        else
+        {
+log("sending_msg_routing for_reply: " + uniqID);
+        	 WEB_CMM.fill_recepients_by_FNIDs(a_wall_editor_group.editor, a_wall_editor_group.reply_recipients);
+        }
         
         WEB_CMM.trigger_preSending();
         

@@ -77,7 +77,7 @@
                 for(let i = 0; i < prNode.fnDocIdVals.length; ++i)
                 {
                     let fnDocIdVal = prNode.fnDocIdVals[i];
-                    prNodeTextContent = prNodeTextContent.replace("#fnDocIdVal"+i, "fndocid:"+fnDocIdVal +"!!##Thie should be on the page, if this lien is on the page, then maybe fnclient is not running,");
+                    prNodeTextContent = prNodeTextContent.replace("#fnDocIdVal"+i, "fndocid:"+fnDocIdVal);
                 }
                 prNode.innerHTML = "";
                 let newNode = doc.createTextNode(prNodeTextContent);
